@@ -19,8 +19,7 @@
     "api/index.py": {
       "includeFiles": [
         "templates/**",
-        "static/**",
-        "firebase.json"
+        "static/**"
       ]
     }
   }
