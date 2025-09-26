@@ -225,6 +225,60 @@
             gap: 5px;
         }
         
+        /* Search functionality styles - positioned in table */
+        .search-row {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .search-cell {
+            padding: 10px 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .search-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        #memberSearchInput {
+            padding: 8px 35px 8px 12px;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: #fff;
+            border-radius: 20px;
+            width: 300px;
+            font-family: "Rajdhani", sans-serif !important;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        
+        #memberSearchInput:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        #memberSearchInput::placeholder {
+            color: #888;
+            font-family: "Rajdhani", sans-serif !important;
+        }
+        
+        .cabinet-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+        
+        /* Search message styles */
+        #searchMessage td {
+            background: rgba(0, 0, 0, 0.1) !important;
+            font-style: italic;
+            color: #888 !important;
+        }
+        
         /* Remove wizard-specific styles - use default member styles */
     </style>
 </head>
@@ -250,6 +304,8 @@
         </div>
     </div>
     
+
+    
     <div class="sample-section-wrap">
         <div class="sample-section">
             <table class="board">
@@ -272,6 +328,20 @@
                     </tr>
                 </section>
                 <!-- TABLE DROPDOWN END -->
+
+                <!-- Search bar for admin/cabinet users -->
+                {% if current_user and current_user.role in ['admin', 'cabinet'] %}
+                <section>
+                    <tr class="search-row">
+                        <td colspan="6" class="search-cell">
+                            <div class="search-container">
+                                <input type="text" id="memberSearchInput" placeholder="Search members..." 
+                                       onkeyup="searchMembers()">
+                            </div>
+                        </td>
+                    </tr>
+                </section>
+                {% endif %}
 
                 {% for act in all_acts%}
                 <!-- INDIVIDUAL ACT -->
@@ -762,6 +832,173 @@
             // Make category not required if manual entry is available
             document.getElementById('memberCategory').removeAttribute('required');
         }
+
+        function searchMembers() {
+            const searchInput = document.getElementById('memberSearchInput');
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const tableRows = document.querySelectorAll('.board tr.data');
+            
+            // Show/hide clear button
+            toggleClearButton(searchTerm !== '');
+            
+            // If search is empty, show all rows
+            if (searchTerm === '') {
+                tableRows.forEach(row => {
+                    row.style.display = '';
+                });
+                updateRankNumbers();
+                hideSearchMessage();
+                return;
+            }
+            
+            // Hide/show rows based on search term
+            let visibleCount = 0;
+            tableRows.forEach(row => {
+                const nameCell = row.querySelector('.player');
+                if (nameCell) {
+                    const memberName = nameCell.textContent.toLowerCase();
+                    if (memberName.includes(searchTerm)) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Update rank numbers for visible rows
+            updateRankNumbers();
+            
+            // Show a message if no results found
+            if (visibleCount === 0) {
+                showSearchMessage('No members found matching "' + searchInput.value + '"');
+            } else {
+                hideSearchMessage();
+                if (visibleCount === 1) {
+                    showSearchMessage('1 member found');
+                } else {
+                    showSearchMessage(visibleCount + ' members found');
+                }
+                // Hide the message after 2 seconds
+                setTimeout(hideSearchMessage, 2000);
+            }
+        }
+        
+        function toggleClearButton(show) {
+            let clearBtn = document.getElementById('clearSearchBtn');
+            if (show && !clearBtn) {
+                // Create clear button
+                clearBtn = document.createElement('button');
+                clearBtn.id = 'clearSearchBtn';
+                clearBtn.innerHTML = '&times;';
+                clearBtn.style.cssText = `
+                    position: absolute;
+                    right: 8px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: none;
+                    border: none;
+                    color: #888;
+                    font-size: 18px;
+                    cursor: pointer;
+                    padding: 0;
+                    width: 20px;
+                    height: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                clearBtn.onclick = clearSearch;
+                clearBtn.title = 'Clear search';
+                
+                const searchContainer = document.querySelector('.search-container');
+                if (searchContainer) {
+                    searchContainer.appendChild(clearBtn);
+                }
+            } else if (!show && clearBtn) {
+                clearBtn.remove();
+            }
+        }
+        
+        function clearSearch() {
+            const searchInput = document.getElementById('memberSearchInput');
+            searchInput.value = '';
+            searchMembers();
+            searchInput.focus();
+        }
+        
+        function updateRankNumbers() {
+            const visibleRows = document.querySelectorAll('.board tr.data:not([style*="display: none"])');
+            let currentRank = 1;
+            let cabinetCount = 0;
+            
+            visibleRows.forEach(row => {
+                const rankCell = row.querySelector('.rank');
+                const ratingCell = row.querySelector('.rating .rating-value');
+                
+                if (rankCell && ratingCell) {
+                    const rating = ratingCell.textContent;
+                    
+                    // Handle cabinet members (∞ rating)
+                    if (rating === '∞') {
+                        cabinetCount++;
+                        rankCell.textContent = '#C' + cabinetCount;
+                    } else if (rating === 'WIZARD') {
+                        rankCell.textContent = '👑';
+                    } else {
+                        // Regular members
+                        rankCell.textContent = '#' + currentRank;
+                        currentRank++;
+                    }
+                }
+            });
+        }
+        
+        function showSearchMessage(message) {
+            hideSearchMessage(); // Remove any existing message
+            
+            const messageRow = document.createElement('tr');
+            messageRow.id = 'searchMessage';
+            messageRow.innerHTML = `
+                <td colspan="6" style="text-align: center; padding: 20px; color: #888; font-style: italic;">
+                    ${message}
+                </td>
+            `;
+            
+            // Insert after the first section (header)
+            const firstSection = document.querySelector('.board section:first-child');
+            if (firstSection && firstSection.nextElementSibling) {
+                firstSection.parentNode.insertBefore(messageRow, firstSection.nextElementSibling);
+            }
+        }
+        
+        function hideSearchMessage() {
+            const existingMessage = document.getElementById('searchMessage');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+        }
+        
+        // Clear search when ACT changes
+        document.getElementById('act').addEventListener('change', function() {
+            const searchInput = document.getElementById('memberSearchInput');
+            if (searchInput) {
+                searchInput.value = '';
+                toggleClearButton(false); // Remove clear button
+                searchMembers(); // Reset the search
+            }
+        });
+
+        // Keyboard shortcut: Ctrl+F to focus search (only for admin users)
+        document.addEventListener('keydown', function(e) {
+            // Check if user is admin/cabinet and search input exists
+            const searchInput = document.getElementById('memberSearchInput');
+            if (searchInput && e.ctrlKey && e.key === 'f') {
+                e.preventDefault(); // Prevent default browser search
+                searchInput.focus();
+                searchInput.select(); // Select any existing text
+            }
+        });
 
         function showAddMember() {
             document.getElementById('memberModalTitle').textContent = 'Add Member';
