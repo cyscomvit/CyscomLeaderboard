@@ -26,19 +26,56 @@ def check_if_required_env_variables_are_present():
         "CURRENT_ACT_YEAR",
         "FIREBASE_STORAGE",
         "SECRET_KEY",
+        "FIREBASE_TYPE",
+        "FIREBASE_PROJECT_ID",
+        "FIREBASE_PRIVATE_KEY_ID",
+        "FIREBASE_PRIVATE_KEY",
+        "FIREBASE_CLIENT_EMAIL",
+        "FIREBASE_CLIENT_ID",
+        "FIREBASE_AUTH_URI",
+        "FIREBASE_TOKEN_URI",
+        "FIREBASE_AUTH_PROVIDER_X509_CERT_URL",
+        "FIREBASE_CLIENT_X509_CERT_URL",
+        "FIREBASE_UNIVERSE_DOMAIN",
     }
 
-    if not all(env in environ for env in required_env_variables):
+    missing_vars = [x for x in required_env_variables if x not in environ]
+    if missing_vars:
         raise RuntimeError(
-            f"The following required environmental variables have not been set - {(x for x in required_env_variables if x not in environ)}"
+            f"The following required environmental variables have not been set - {missing_vars}"
         )
 
 
 check_if_required_env_variables_are_present()
 
 
-# Initialize Firebase app
-creds = credentials.Certificate("firebase.json")
+
+# Create credentials from environment variables
+private_key_raw = getenv("FIREBASE_PRIVATE_KEY")
+if private_key_raw:
+    # Convert literal \n to actual newlines and remove quotes if present
+    private_key_processed = private_key_raw.replace('\\n', '\n').strip('"')
+    print(f"Debug: Private key starts with: {private_key_processed[:50]}...")
+    print(f"Debug: Private key ends with: {private_key_processed[-50:]}")
+else:
+    print("Debug: No private key found in environment")
+    private_key_processed = None
+
+firebase_config = {
+    "type": getenv("FIREBASE_TYPE"),
+    "project_id": getenv("FIREBASE_PROJECT_ID"),
+    "private_key_id": getenv("FIREBASE_PRIVATE_KEY_ID"),
+    "private_key": private_key_processed,
+    "client_email": getenv("FIREBASE_CLIENT_EMAIL"),
+    "client_id": getenv("FIREBASE_CLIENT_ID"),
+    "auth_uri": getenv("FIREBASE_AUTH_URI"),
+    "token_uri": getenv("FIREBASE_TOKEN_URI"),
+    "auth_provider_x509_cert_url": getenv("FIREBASE_AUTH_PROVIDER_X509_CERT_URL"),
+    "client_x509_cert_url": getenv("FIREBASE_CLIENT_X509_CERT_URL"),
+    "universe_domain": getenv("FIREBASE_UNIVERSE_DOMAIN")
+}
+
+creds = credentials.Certificate(firebase_config)
 initialize_app(
     creds,
     {
