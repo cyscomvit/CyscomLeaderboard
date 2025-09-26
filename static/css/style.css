@@ -1,0 +1,224 @@
+@import url("https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Teko:wght@600&display=swap");
+
+/* Force Rajdhani font throughout the entire application, but exclude Font Awesome icons */
+*:not(.fa):not(.fas):not(.far):not(.fal):not(.fab):not(.fad):not([class*="fa-"]) {
+  font-family: "Rajdhani", sans-serif !important;
+}
+
+/* Ensure Font Awesome icons use their proper font */
+.fa, .fas, .far, .fal, .fab, .fad, [class*="fa-"] {
+  font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 6 Brands" !important;
+}
+
+body {
+  margin: 0;
+  font-family: "Rajdhani", sans-serif !important;
+  background-color: #ece8e1;
+}
+
+/* Override Bootstrap font defaults */
+.btn, .form-control, .form-select, .modal, .card, .table {
+  font-family: "Rajdhani", sans-serif !important;
+}
+
+/* Board and table specific font declarations */
+.board, .board * {
+  font-family: "Rajdhani", sans-serif !important;
+}
+
+table, td, th, tr {
+  font-family: "Rajdhani", sans-serif !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Rajdhani", sans-serif !important;
+}
+.sample-header {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  background-image: url("../images/banner.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.sample-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: MidnightBlue;
+  opacity: 0.3;
+}
+.sample-header-section {
+  position: relative;
+  padding: 15% 0 10%;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+h1 {
+  font-weight: 500;
+}
+h2 {
+  font-weight: 400;
+  text-align: center;
+}
+.sample-section-wrap {
+  position: relative;
+  background-color: #ece8e1;
+}
+.sample-section {
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 40px;
+  color: #768079;
+  width: 90%;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+}
+
+.heading {
+    background: #0f1923;
+    color: #DBD9D2;
+    font-size: 2.4rem;
+}
+
+.middle {
+    text-align: center;
+    border-right: 1px solid #DBD9D2;
+    border-left: 1px solid #DBD9D2;
+}
+
+.center-text {
+    text-align: center;
+}
+
+.special-black-right {
+    text-align: center;
+    width: 25%;
+}
+
+.special-black-left {
+    text-align: center;
+}
+
+.sub-heading {
+    background: #ece8e1;
+    color: #768079;
+    font-weight: bolder;
+    font-family: "Rajdhani", sans-serif !important;
+}
+
+.rating {
+    background: #dbd9d2;
+    font-size: 1.6rem;
+    font-family: "Rajdhani", sans-serif !important;
+}
+
+.rating-image {
+    background: #dbd9d2;
+    font-size: 1.6rem;
+    text-align: center;
+    font-family: "Rajdhani", sans-serif !important;
+}
+
+.rank {
+    font-size: 2.4rem;
+    font-weight: bolder;
+    text-align: center;
+    font-family: "Rajdhani", sans-serif !important;
+}
+
+.player {
+    font-size: 1.6rem;
+    background: rgba(219,217,210,0.6);
+    font-family: "Rajdhani", sans-serif !important;
+}
+
+.ongoing {
+    font-size: 1.6rem;
+    text-align: center;
+    font-family: "Rajdhani", sans-serif !important;
+}
+.data {
+    background: #e3dfd9;
+    color: black;
+    font-family: "Rajdhani", sans-serif !important;
+}
+
+.discord-tag {
+    color: #888;
+    font-family: "Rajdhani", sans-serif !important;
+}
+
+.rating-value {
+    padding: 0px;
+    font-family: "Rajdhani", sans-serif !important;
+}
+
+.divider {
+    background: #dbd9d2;
+    height: 80px;
+    color: #768079;
+    font-weight: bolder;
+    border-top: 2px solid #cccac2;
+    border-bottom: 2px solid #cccac2;
+    font-family: "Rajdhani", sans-serif !important;
+}
+
+.seperate {
+    text-align: center;
+    font-size: 2.4rem;
+}
+
+.box{
+  width: 100%;
+}
+
+.box select {
+  background-color: #0f1923;
+  padding: 12px;
+  border: none;
+  -webkit-appearance: button;
+  appearance: button;
+  outline: none;
+  font-family: "Rajdhani", sans-serif;
+  color: #DBD9D2;
+  font-size: 2.4rem;
+  font-weight: bold;
+}
+
+.box select option {
+  padding: 30px;
+  font-family: "Rajdhani", sans-serif;
+  color: #DBD9D2;
+  font-weight: bold;
+}
+
+
+.box select:focus {
+  min-width: 150px;
+  width: auto;
+}

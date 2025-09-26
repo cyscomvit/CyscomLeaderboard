@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CYSCOM VITC | Leaderboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/home/images/cyscom-logo.png" rel="icon">
+    <meta name="author" content="CYSCOM VIT">
+    <meta name="description" content="The official leaderboard for CYSCOM VITC.">
+    <script defer src="https://analytics.cyscomvit.com/script.js" data-website-id="dcaa4837-6710-450a-b951-4afccb0a7383"></script>
+    <style>
+        /* Force Rajdhani font family throughout, but preserve Font Awesome icons */
+        *:not(.fa):not(.fas):not(.far):not(.fal):not(.fab):not(.fad):not([class*="fa-"]) {
+            font-family: "Rajdhani", sans-serif !important;
+        }
+        
+        /* Ensure Font Awesome icons use their proper font */
+        .fa, .fas, .far, .fal, .fab, .fad, [class*="fa-"] {
+            font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 6 Brands" !important;
+            font-weight: 900;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body, html {
+            font-family: "Rajdhani", sans-serif !important;
+        }
+        
+        .board, .board * {
+            font-family: "Rajdhani", sans-serif !important;
+        }
+        
+        .board .fa, .board .fas, .board .far, .board .fal, .board .fab, .board .fad, .board [class*="fa-"] {
+            font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 6 Brands" !important;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: "Rajdhani", sans-serif !important;
+        }
+        
+        .modal *, .btn *, .form-control *, .form-select * {
+            font-family: "Rajdhani", sans-serif !important;
+        }
+        
+        .modal .fa, .modal .fas, .modal .far, .modal .fal, .modal .fab, .modal .fad, .modal [class*="fa-"] {
+            font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 6 Brands" !important;
+        }
+        
+        .edit-btn, .add-btn {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+            font-family: "Rajdhani", sans-serif !important;
+        }
+        
+        /* Ensure icons in buttons display correctly */
+        .edit-btn i, .add-btn i, .btn i, .floating-btn i {
+            font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro", "Font Awesome 6 Brands" !important;
+            font-weight: 900;
+            font-style: normal;
+        }
+        .edit-btn:hover, .add-btn:hover {
+            opacity: 1;
+            color: #764ba2;
+        }
+        .tier-badge {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+        .cabinet-actions {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+        .floating-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 20px;
+            margin-left: 10px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: transform 0.3s ease;
+        }
+        .floating-btn:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+        .modal-content {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        .tier-preview {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        /* Fort Night Styles */
+        .fort-night-section {
+            margin: 20px 0;
+        }
+        
+        .fort-night-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .fort-night-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        .fort-night-header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .fort-night-title {
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+        
+        .fort-night-title i {
+            font-size: 24px;
+            margin-right: 15px;
+            color: #ffd700;
+        }
+        
+        .fort-night-title h3 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .btn-fort-night-edit {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-fort-night-edit:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .fort-night-content {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+        }
+        
+        .fort-night-info h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .fort-night-info p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        .fort-night-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .badge {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Search functionality styles - positioned in table */
+        .search-row {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .search-cell {
+            padding: 10px 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .search-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        #memberSearchInput {
+            padding: 8px 35px 8px 12px;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: #fff;
+            border-radius: 20px;
+            width: 300px;
+            font-family: "Rajdhani", sans-serif !important;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        
+        #memberSearchInput:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+        
+        #memberSearchInput::placeholder {
+            color: #888;
+            font-family: "Rajdhani", sans-serif !important;
+        }
+        
+        .cabinet-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+        
+        /* Search message styles */
+        #searchMessage td {
+            background: rgba(0, 0, 0, 0.1) !important;
+            font-style: italic;
+            color: #888 !important;
+        }
+        
+        /* Remove wizard-specific styles - use default member styles */
+    </style>
+</head>
+
+<body>
+    <div class="sample-header">
+        <div class="sample-header-section">
+            <img src="/static/images/logo.png" style="height: 100px;">
+            <h1 style="font-weight: 700; font-size: 72px;">
+                CYSCOM VITC
+            </h1>
+            <h2>THE OFFICIAL LEADERBOARD OF CYSCOM VITC</h2>
+            {% if current_user and current_user.role in ['admin', 'cabinet'] %}
+            <div style="margin-top: 20px;">
+                <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 25px; font-weight: 600; display: inline-block; margin-right: 10px;">
+                    <i class="fas fa-user-shield"></i> {{ current_user.role.title() }} Access - Manage leaderboard below
+                </span>
+                <a href="{{ url_for('logout') }}" style="background: #6c757d; color: white; text-decoration: none; padding: 10px 20px; border-radius: 25px; font-weight: 600; display: inline-block;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+
+    
+    <div class="sample-section-wrap">
+        <div class="sample-section">
+            <table class="board">
+                <!-- TABLE DROPDOWN START -->
+                <section>
+                    <tr class="heading">
+                        <th class="special-black-left"><img
+                                src="{{ url_for('static', filename='images/immortal-badge.png') }}"></th>
+                        <th colspan="3" class="middle">CYSCOM LEADERBOARD</th>
+                        <th class="special-black-right">
+                            <div class="box">
+                                <select name="act" id="act" style="width:auto">
+                                    {% for act in all_acts %}
+                                    <option value="act{{act.num}}" {% if all_acts[0]==act %}selected{% endif %}>
+                                        {{act.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </th>
+                    </tr>
+                </section>
+                <!-- TABLE DROPDOWN END -->
+
+                <!-- Search bar for admin/cabinet users -->
+                {% if current_user and current_user.role in ['admin', 'cabinet'] %}
+                <section>
+                    <tr class="search-row">
+                        <td colspan="6" class="search-cell">
+                            <div class="search-container">
+                                <input type="text" id="memberSearchInput" placeholder="Search members..." 
+                                       onkeyup="searchMembers()">
+                            </div>
+                        </td>
+                    </tr>
+                </section>
+                {% endif %}
+
+                {% for act in all_acts%}
+                <!-- INDIVIDUAL ACT -->
+                <tbody id="act{{act.num}}" {% if act !=all_acts[0] %}style="display:none" {% endif %}>
+                    <!-- TABLE HEADER START -->
+                    <tr class="sub-heading">
+                        <td class="center-text">Rank</td>
+                        <td class="center-text" colspan="2">Rating</td>
+                        <td>Name</td>
+                        <td class="center-text">Contributions</td>
+                        {% if current_user and current_user.role in ['admin', 'cabinet'] %}
+                        <td class="center-text">Actions</td>
+                        {% endif %}
+                    </tr>
+                    <!-- TABLE HEADER END -->
+
+                    <!-- CABINET MEMBERS, i.e ALL MEMBERS HAVING RATING > 5000 -->
+                    <section>
+                        {% for member in act.cabinet %}
+                        <tr class="data">
+                            <td class="rank">{{ '#' }}</td>
+                            <td class="rating-image">
+                                <img src="/static/images/radiant.png" style="height: 2em;">
+                            </td>
+                            <td class="rating">
+                                <span class="rating-value">&#8734;</span>
+                            </td>
+                            <td class="player">{{ member['Name'] }}</td>
+                            <td class="ongoing">&#8734; Contributions</td>
+                            {% if current_user and current_user.role in ['admin', 'cabinet'] %}
+                            <td>
+                                <button class="edit-btn" 
+                                        data-act="{{act.num}}" 
+                                        data-member-id="{{member.get('id', '')}}" 
+                                        data-name="{{member['Name']}}" 
+                                        data-rating="{{member['Rating']}}" 
+                                        data-contributions="{{member.get('Contributions', 0)}}"
+                                        onclick="editMemberFromData(this)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="edit-btn text-danger" 
+                                        data-act="{{act.num}}" 
+                                        data-member-id="{{member.get('id', '')}}" 
+                                        data-name="{{member['Name']}}"
+                                        onclick="deleteMemberFromData(this)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </section>
+                    <!-- END CABINET -->
+
+                    <!-- WIZARD OF THE FORTNIGHT SECTION - Only for current ACT -->
+                    {% if loop.first and fort_night and fort_night.wizard_name %}
+                    <!-- Wizard Heading -->
+                    <section>
+                        <tr class="divider">
+                            <td colspan="{% if current_user and current_user.role in ['admin', 'cabinet'] %}6{% else %}5{% endif %}" class="seperate">
+                                Wizard of the Fortnight
+                            </td>
+                        </tr>
+                    </section>
+                    <!-- Wizard Entry -->
+                    <section>
+                        <tr class="data">
+                            <td class="rank">&nbsp;</td>
+                            <td class="rating-image">
+                                <img src="/static/images/immortal-badge.png" style="height: 2em;">
+                            </td>
+                            <td class="rating">{{ fort_night.points or 'WIZARD' }}</td>
+                            <td class="player">{{ fort_night.wizard_name }}</td>
+                            <td class="ongoing">Wizard of the Fortnight</td>
+                            {% if current_user and current_user.role in ['admin', 'cabinet'] %}
+                            <td>
+                                <button class="edit-btn" onclick="editWizard()" title="Edit Wizard">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                            {% endif %}
+                        </tr>
+                    </section>
+                    {% endif %}
+
+                    <!-- CABINET TO MEMBERS DIVIDER -->
+                    <section>
+                        <tr class="divider">
+                            <td colspan="{% if current_user and current_user.role in ['admin', 'cabinet'] %}6{% else %}5{% endif %}" class="seperate">
+                                Members Leaderboard
+                            </td>
+                        </tr>
+                    </section>
+                    <!-- END DIVIDER -->
+
+                    <!-- START MEMBERS -->
+                    <section>
+                        {% for member in act.members %}
+                        <tr class="data">
+                            <td class="rank">{{ loop.index }}</td>
+                            <td class="rating-image">
+                                <img src="/static/images/{{ member['Image'] }}.png" style="height: 2em;">
+                            </td>
+                            <td class="rating">
+                                <span class="rating-value">{{ member['Rating'] }}</span>
+                            </td>
+                            <td class="player">{{ member['Name'] }}</td>
+                            <td class="ongoing">{{ member['Contributions'] }} Contributions</td>
+                            {% if current_user and current_user.role in ['admin', 'cabinet'] %}
+                            <td>
+                                <button class="edit-btn" 
+                                        data-act="{{act.num}}" 
+                                        data-member-id="{{member.get('id', '')}}" 
+                                        data-name="{{member['Name']}}" 
+                                        data-rating="{{member['Rating']}}" 
+                                        data-contributions="{{member.get('Contributions', 0)}}"
+                                        onclick="editMemberFromData(this)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="edit-btn text-danger" 
+                                        data-act="{{act.num}}" 
+                                        data-member-id="{{member.get('id', '')}}" 
+                                        data-name="{{member['Name']}}"
+                                        onclick="deleteMemberFromData(this)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </section>
+                    <!-- END MEMBERS -->
+
+                </tbody>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    <!-- Floating Action Buttons for Cabinet Members -->
+    {% if current_user and current_user.role in ['admin', 'cabinet'] %}
+    <div class="cabinet-actions">
+        <button class="floating-btn" onclick="showAddMember()" title="Add Member">
+            <i class="fas fa-plus"></i> Add Member
+        </button>
+    </div>
+    {% endif %}
+
+    <!-- Add/Edit Member Modal -->
+    <div class="modal fade" id="memberModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="memberModalTitle">Add Member</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="memberForm">
+                        <input type="hidden" id="memberId" name="member_id">
+                        <input type="hidden" id="actionType" name="action_type" value="add">
+                        
+                        <div class="mb-3">
+                            <label for="memberAct" class="form-label">ACT</label>
+                            <select class="form-select" id="memberAct" name="act" required>
+                                {% for act in all_acts %}
+                                <option value="{{act.num}}">{{act.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="memberName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="memberName" name="name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="memberCategory" class="form-label">
+                                Contribution Category
+                                <span class="tier-preview" id="tierPreview"></span>
+                            </label>
+                            <select class="form-select" id="memberCategory" name="category" required>
+                                <option value="">Select contribution type...</option>
+                                
+                                <!-- Development -->
+                                <optgroup label="------------Development------------">
+                                    <option value="easy_pr" data-points="20">Easy PR (20 points)</option>
+                                    <option value="medium_pr" data-points="40">Medium PR (40 points)</option>
+                                    <option value="hard_pr" data-points="80">Hard PR (80 points)</option>
+                                </optgroup>
+                                
+                                <!-- CTF -->
+                                <optgroup label="------------CTF------------">
+                                    <option value="ctf_host" data-points="30">CTF Host (30 points)</option>
+                                    <option value="ctf_attendee" data-points="10">CTF Attendee (10 points)</option>
+                                    <option value="ctf_easy_challenge" data-points="20">CTF Easy Challenge (20 points)</option>
+                                    <option value="ctf_medium_challenge" data-points="40">CTF Medium Challenge (40 points)</option>
+                                    <option value="ctf_hard_challenge" data-points="80">CTF Hard Challenge (80 points)</option>
+                                </optgroup>
+                                
+                                <!-- Content Creation -->
+                                <optgroup label="------------Content------------">
+                                    <option value="info_content" data-points="40">Info Content (40 points)</option>
+                                    <option value="blog_content" data-points="60">Blog Content (60 points)</option>
+                                    <option value="news_content" data-points="40">News Content (40 points)</option>
+                                    <option value="sm_posting" data-points="15">Social Media Posting (15 points)</option>
+                                    <option value="caption" data-points="5">Caption (5 points)</option>
+                                </optgroup>
+                                
+                                <!-- Organization -->
+                                <optgroup label="------------Organization------------">
+                                    <option value="subordinate" data-points="20">Subordinate (20 points)</option>
+                                    <option value="idea" data-points="3">Idea (3 points)</option>
+                                    <option value="brochure" data-points="10">Brochure (10 points)</option>
+                                    <option value="demos" data-points="20">Demos (20 points)</option>
+                                    <option value="video_editing" data-points="20">Video Editing (20 points)</option>
+                                </optgroup>
+                                
+                                <!-- Organizational Committee -->
+                                <optgroup label="------------OC------------">
+                                    <option value="oc_volunteer" data-points="30">OC Volunteer (30 points)</option>
+                                    <option value="oc_assigned" data-points="20">OC Assigned (20 points)</option>
+                                    <option value="oc_no_work" data-points="10">OC No Work (10 points)</option>
+                                    <option value="oc_manager" data-points="50">OC Manager (50 points)</option>
+                                </optgroup>
+                                
+                                <!-- Events -->
+                                <optgroup label="------------Events------------">
+                                    <option value="em_lite" data-points="15">EM Lite (15 points)</option>
+                                    <option value="em_medium" data-points="30">EM Medium (30 points)</option>
+                                    <option value="em_heavy" data-points="60">EM Heavy (60 points)</option>
+                                </optgroup>
+                                
+                                <!-- Social Functions -->
+                                <optgroup label="------------Social------------">
+                                    <option value="sf_lite" data-points="30">SF Lite (30 points)</option>
+                                    <option value="sf_medium" data-points="60">SF Medium (60 points)</option>
+                                    <option value="wtf" data-points="75">WTF (75 points)</option>
+                                </optgroup>
+                                
+                                <!-- Community & Marketing -->
+                                <optgroup label="------------Community------------">
+                                    <option value="discord" data-points="10">Discord (10 points)</option>
+                                    <option value="marketing" data-points="20">Marketing (20 points)</option>
+                                </optgroup>
+                                
+                                <!-- Projects -->
+                                <optgroup label="------------Projects------------">
+                                    <option value="mini_project" data-points="100">Mini Project (100 points)</option>
+                                    <option value="complete_project" data-points="200">Complete Project (200 points)</option>
+                                </optgroup>
+                                
+                                <!-- Promotions -->
+                                <optgroup label="------------Promotion------------">
+                                    <option value="promotion_medium" data-points="25">Promotion Medium (25 points)</option>
+                                    <option value="promotion_large" data-points="50">Promotion Large (50 points)</option>
+                                </optgroup>
+                                
+                                <!-- Design Work -->
+                                <optgroup label="------------Design------------">
+                                    <option value="blog_design" data-points="35">Blog Design (35 points)</option>
+                                    <option value="info_design" data-points="45">Info Design (45 points)</option>
+                                    <option value="news_design" data-points="45">News Design (45 points)</option>
+                                    <option value="weekly_work_design" data-points="40">Weekly Work Design (40 points)</option>
+                                </optgroup>
+                            </select>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle"></i> 
+                                <strong>Category-Based Points:</strong> Select the type of contribution to automatically assign points. 
+                                <br><i class="fas fa-plus-circle text-success"></i> 
+                                <strong>Auto-Increment:</strong> Contributions count will automatically increase by +1 when using categories.
+                            </div>
+                        </div>
+                        
+                        <!-- Manual rating field - only visible for 'unknown' account -->
+                        <div class="mb-3" id="manualRatingSection" style="display: none;">
+                            <label for="memberRating" class="form-label">
+                                Manual Points (Admin Override)
+                                <span class="tier-preview" id="manualTierPreview"></span>
+                            </label>
+                            <input type="number" class="form-control" id="memberRating" name="rating" min="0">
+                            <div class="form-text">
+                                <i class="fas fa-exclamation-triangle text-warning"></i> 
+                                <strong>Admin Only:</strong> Manual point entry available for 'unknown' account only.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="memberContributions" class="form-label">Contributions</label>
+                            <input type="number" class="form-control" id="memberContributions" name="contributions" min="0" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="makeWizard" name="make_wizard">
+                                <label class="form-check-label" for="makeWizard">
+                                    <i class="fas fa-star text-warning"></i> Make this member "Wizard of the Fortnight"
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveMember()">
+                        <span id="saveButtonText">Add Member</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete <strong id="deleteMemberName"></strong>?</p>
+                    <p class="text-muted small">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wizard of the Fortnight Modal -->
+    <div class="modal fade" id="wizardModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-star me-2"></i>
+                        Manage Wizard of the Fortnight
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="wizardForm">
+                        <div class="mb-3">
+                            <label for="wizardSelect" class="form-label">
+                                <i class="fas fa-users"></i> Choose Member
+                            </label>
+                            <select class="form-control" id="wizardSelect" required>
+                                <option value="none">None (Remove Wizard section)</option>
+                                <!-- Populated by current act -->
+                            </select>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Current ACT Only:</strong> The Wizard of the Fortnight section only appears for the current ACT ({{ all_acts[0].name }}) and will automatically expire after 14 days.
+                            <br><small>Select "None" to hide the wizard section completely, or choose a member to display as "Wizard of the Fortnight".</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveWizard()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src='https://code.jquery.com/jquery-latest.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/script.js"></script>
+    
+    <script id="acts-data" type="application/json">{{ all_acts_json|safe }}</script>
+    
+    <script>
+        // @ts-nocheck
+        /* eslint-disable */
+        let deleteActNum = null;
+        let deleteMemberIdToDelete = null;
+
+        // Server-generated data
+        const allActsData = JSON.parse(document.getElementById('acts-data').textContent);
+
+        // Tier calculation function - Base tier estimation (actual tiers are calculated server-side with dynamic thresholds)
+        function getTierInfo(rating) {
+            if (rating >= 5000) return {name: 'Radiant', color: '#ff6b6b', textColor: '#fff'};
+            if (rating >= 4500) return {name: 'Immortal', color: '#a855f7', textColor: '#fff'};
+            
+            // Base thresholds (may be adjusted dynamically server-side)
+            if (rating >= 320) return {name: 'Diamond III*', color: '#3b82f6', textColor: '#fff'};
+            if (rating >= 280) return {name: 'Diamond II*', color: '#3b82f6', textColor: '#fff'};
+            if (rating >= 250) return {name: 'Diamond I*', color: '#3b82f6', textColor: '#fff'};
+            
+            if (rating >= 220) return {name: 'Platinum III*', color: '#06b6d4', textColor: '#fff'};
+            if (rating >= 200) return {name: 'Platinum II*', color: '#06b6d4', textColor: '#fff'};
+            if (rating >= 180) return {name: 'Platinum I*', color: '#06b6d4', textColor: '#fff'};
+            
+            if (rating >= 150) return {name: 'Gold III*', color: '#eab308', textColor: '#000'};
+            if (rating >= 125) return {name: 'Gold II*', color: '#eab308', textColor: '#000'};
+            if (rating >= 100) return {name: 'Gold I*', color: '#eab308', textColor: '#000'};
+            
+            if (rating >= 90) return {name: 'Silver III', color: '#6b7280', textColor: '#fff'};
+            if (rating >= 85) return {name: 'Silver II', color: '#6b7280', textColor: '#fff'};
+            if (rating >= 75) return {name: 'Silver I', color: '#6b7280', textColor: '#fff'};
+            
+            if (rating >= 65) return {name: 'Bronze III', color: '#cd7c2f', textColor: '#fff'};
+            if (rating >= 60) return {name: 'Bronze II', color: '#cd7c2f', textColor: '#fff'};
+            if (rating >= 50) return {name: 'Bronze I', color: '#cd7c2f', textColor: '#fff'};
+            
+            if (rating >= 40) return {name: 'Iron III', color: '#4b5563', textColor: '#fff'};
+            if (rating >= 35) return {name: 'Iron II', color: '#4b5563', textColor: '#fff'};
+            if (rating >= 25) return {name: 'Iron I', color: '#4b5563', textColor: '#fff'};
+            
+            if (rating > 0) return {name: 'Iron I', color: '#4b5563', textColor: '#fff'};
+            return {name: 'Unranked', color: '#9ca3af', textColor: '#000'};
+        }
+
+        // Update tier preview when category or manual rating changes
+        document.getElementById('memberCategory').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const additionalPoints = parseInt(selectedOption.dataset.points) || 0;
+            
+            // Get current rating from form (for edit mode)
+            const currentRating = parseInt(document.getElementById('currentRating')?.value) || 0;
+            const isEditing = document.getElementById('actionType').value === 'edit';
+            
+            let totalPoints = additionalPoints;
+            let previewText = '';
+            
+            if (isEditing && currentRating > 0) {
+                // Show addition for edit mode
+                totalPoints = currentRating + additionalPoints;
+                previewText = `+${additionalPoints} → ${totalPoints}`;
+            } else {
+                // Show just points for add mode
+                previewText = `${totalPoints} points`;
+            }
+            
+            updateTierPreview(totalPoints, 'tierPreview', previewText);
+            
+            // Clear manual rating when category is selected
+            document.getElementById('memberRating').value = '';
+            document.getElementById('manualTierPreview').style.display = 'none';
+        });
+        
+        document.getElementById('memberRating').addEventListener('input', function() {
+            const rating = parseInt(this.value) || 0;
+            const currentUser = '{{ current_user.username if current_user else "" }}';
+            const isUnknownUser = currentUser.toLowerCase() === 'unknown';
+            
+            if (isUnknownUser) {
+                // For unknown user, manual entry overwrites (show final value)
+                updateTierPreview(rating, 'manualTierPreview', `${rating} points (final)`);
+            } else {
+                // Regular users shouldn't see manual entry, but just in case
+                updateTierPreview(rating, 'manualTierPreview', `${rating} points`);
+            }
+            
+            // Clear category when manual rating is entered
+            if (rating > 0) {
+                document.getElementById('memberCategory').value = '';
+                document.getElementById('tierPreview').style.display = 'none';
+            }
+        });
+        
+        function updateTierPreview(rating, previewId, customText) {
+            if (!rating) return;
+            const tier = getTierInfo(rating);
+            const preview = document.getElementById(previewId);
+            
+            // Show custom text if provided, otherwise just tier name
+            preview.textContent = customText ? `${customText} (${tier.name})` : tier.name;
+            preview.style.backgroundColor = tier.color;
+            preview.style.color = tier.textColor;
+            preview.style.display = rating > 0 ? 'inline-block' : 'none';
+        }
+        
+        // Check if current user is 'unknown' account and show manual entry
+        // This would need to be set server-side or via AJAX call
+        // For now, we'll show manual entry section based on a flag
+        const currentUser = '{{ current_user.username if current_user else "" }}';
+        if (currentUser.toLowerCase() === 'unknown') {
+            document.getElementById('manualRatingSection').style.display = 'block';
+            // Make category not required if manual entry is available
+            document.getElementById('memberCategory').removeAttribute('required');
+        }
+
+        function searchMembers() {
+            const searchInput = document.getElementById('memberSearchInput');
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const tableRows = document.querySelectorAll('.board tr.data');
+            
+            // Show/hide clear button
+            toggleClearButton(searchTerm !== '');
+            
+            // If search is empty, show all rows
+            if (searchTerm === '') {
+                tableRows.forEach(row => {
+                    row.style.display = '';
+                });
+                updateRankNumbers();
+                hideSearchMessage();
+                return;
+            }
+            
+            // Hide/show rows based on search term
+            let visibleCount = 0;
+            tableRows.forEach(row => {
+                const nameCell = row.querySelector('.player');
+                if (nameCell) {
+                    const memberName = nameCell.textContent.toLowerCase();
+                    if (memberName.includes(searchTerm)) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Update rank numbers for visible rows
+            updateRankNumbers();
+            
+            // Show a message if no results found
+            if (visibleCount === 0) {
+                showSearchMessage('No members found matching "' + searchInput.value + '"');
+            } else {
+                hideSearchMessage();
+                if (visibleCount === 1) {
+                    showSearchMessage('1 member found');
+                } else {
+                    showSearchMessage(visibleCount + ' members found');
+                }
+                // Hide the message after 2 seconds
+                setTimeout(hideSearchMessage, 2000);
+            }
+        }
+        
+        function toggleClearButton(show) {
+            let clearBtn = document.getElementById('clearSearchBtn');
+            if (show && !clearBtn) {
+                // Create clear button
+                clearBtn = document.createElement('button');
+                clearBtn.id = 'clearSearchBtn';
+                clearBtn.innerHTML = '&times;';
+                clearBtn.style.cssText = `
+                    position: absolute;
+                    right: 8px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: none;
+                    border: none;
+                    color: #888;
+                    font-size: 18px;
+                    cursor: pointer;
+                    padding: 0;
+                    width: 20px;
+                    height: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                clearBtn.onclick = clearSearch;
+                clearBtn.title = 'Clear search';
+                
+                const searchContainer = document.querySelector('.search-container');
+                if (searchContainer) {
+                    searchContainer.appendChild(clearBtn);
+                }
+            } else if (!show && clearBtn) {
+                clearBtn.remove();
+            }
+        }
+        
+        function clearSearch() {
+            const searchInput = document.getElementById('memberSearchInput');
+            searchInput.value = '';
+            searchMembers();
+            searchInput.focus();
+        }
+        
+        function updateRankNumbers() {
+            const visibleRows = document.querySelectorAll('.board tr.data:not([style*="display: none"])');
+            let currentRank = 1;
+            let cabinetCount = 0;
+            
+            visibleRows.forEach(row => {
+                const rankCell = row.querySelector('.rank');
+                const ratingCell = row.querySelector('.rating .rating-value');
+                
+                if (rankCell && ratingCell) {
+                    const rating = ratingCell.textContent;
+                    
+                    // Handle cabinet members (∞ rating)
+                    if (rating === '∞') {
+                        cabinetCount++;
+                        rankCell.textContent = '#C' + cabinetCount;
+                    } else if (rating === 'WIZARD') {
+                        rankCell.textContent = '👑';
+                    } else {
+                        // Regular members
+                        rankCell.textContent = '#' + currentRank;
+                        currentRank++;
+                    }
+                }
+            });
+        }
+        
+        function showSearchMessage(message) {
+            hideSearchMessage(); // Remove any existing message
+            
+            const messageRow = document.createElement('tr');
+            messageRow.id = 'searchMessage';
+            messageRow.innerHTML = `
+                <td colspan="6" style="text-align: center; padding: 20px; color: #888; font-style: italic;">
+                    ${message}
+                </td>
+            `;
+            
+            // Insert after the first section (header)
+            const firstSection = document.querySelector('.board section:first-child');
+            if (firstSection && firstSection.nextElementSibling) {
+                firstSection.parentNode.insertBefore(messageRow, firstSection.nextElementSibling);
+            }
+        }
+        
+        function hideSearchMessage() {
+            const existingMessage = document.getElementById('searchMessage');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+        }
+        
+        // Clear search when ACT changes
+        document.getElementById('act').addEventListener('change', function() {
+            const searchInput = document.getElementById('memberSearchInput');
+            if (searchInput) {
+                searchInput.value = '';
+                toggleClearButton(false); // Remove clear button
+                searchMembers(); // Reset the search
+            }
+        });
+
+        // Keyboard shortcut: Ctrl+F to focus search (only for admin users)
+        document.addEventListener('keydown', function(e) {
+            // Check if user is admin/cabinet and search input exists
+            const searchInput = document.getElementById('memberSearchInput');
+            if (searchInput && e.ctrlKey && e.key === 'f') {
+                e.preventDefault(); // Prevent default browser search
+                searchInput.focus();
+                searchInput.select(); // Select any existing text
+            }
+        });
+
+        function showAddMember() {
+            document.getElementById('memberModalTitle').textContent = 'Add Member';
+            document.getElementById('actionType').value = 'add';
+            document.getElementById('saveButtonText').textContent = 'Add Member';
+            document.getElementById('memberForm').reset();
+            document.getElementById('tierPreview').style.display = 'none';
+            document.getElementById('manualTierPreview').style.display = 'none';
+            
+            // Clear current rating info for add mode
+            const currentRatingInfo = document.getElementById('currentRatingInfo');
+            if (currentRatingInfo) {
+                currentRatingInfo.style.display = 'none';
+            }
+            
+            // Clear hidden current rating field
+            const currentRatingField = document.getElementById('currentRating');
+            if (currentRatingField) {
+                currentRatingField.value = '0';
+            }
+            
+            // Set current act as default
+            const currentAct = document.getElementById('act').value.replace('act', '');
+            document.getElementById('memberAct').value = currentAct;
+            
+            new bootstrap.Modal(document.getElementById('memberModal')).show();
+        }
+
+        function editMemberFromData(button) {
+            const actNum = button.getAttribute('data-act');
+            const memberId = button.getAttribute('data-member-id');
+            const name = button.getAttribute('data-name');
+            const rating = parseInt(button.getAttribute('data-rating'));
+            const contributions = parseInt(button.getAttribute('data-contributions'));
+            
+            editMember(actNum, memberId, name, rating, contributions);
+        }
+
+        function deleteMemberFromData(button) {
+            const actNum = button.getAttribute('data-act');
+            const memberId = button.getAttribute('data-member-id');
+            const name = button.getAttribute('data-name');
+            
+            deleteMember(actNum, memberId, name);
+        }
+
+        function editMember(actNum, memberId, name, rating, contributions) {
+            document.getElementById('memberModalTitle').textContent = 'Edit Member';
+            document.getElementById('actionType').value = 'edit';
+            document.getElementById('saveButtonText').textContent = 'Update Member';
+            
+            document.getElementById('memberId').value = memberId;
+            document.getElementById('memberAct').value = actNum;
+            document.getElementById('memberName').value = name;
+            document.getElementById('memberContributions').value = contributions;
+            
+            // Store current rating for calculations (create hidden field if not exists)
+            let currentRatingField = document.getElementById('currentRating');
+            if (!currentRatingField) {
+                currentRatingField = document.createElement('input');
+                currentRatingField.type = 'hidden';
+                currentRatingField.id = 'currentRating';
+                document.getElementById('memberForm').appendChild(currentRatingField);
+            }
+            currentRatingField.value = rating;
+            
+            // Show current rating info in modal
+            const currentRatingInfo = document.getElementById('currentRatingInfo') || 
+                (() => {
+                    const info = document.createElement('div');
+                    info.id = 'currentRatingInfo';
+                    info.className = 'mb-3 p-2 bg-light border rounded';
+                    document.querySelector('#memberModal .modal-body').prepend(info);
+                    return info;
+                })();
+            
+            const tier = getTierInfo(rating);
+            currentRatingInfo.innerHTML = `
+                <strong>Current Status:</strong> 
+                <span class="badge" style="background-color: ${tier.color}; color: ${tier.textColor};">
+                    ${rating} points - ${tier.name}
+                </span>
+            `;
+            currentRatingInfo.style.display = 'block';
+            
+            // Clear any previous selections
+            document.getElementById('memberCategory').value = '';
+            document.getElementById('memberRating').value = '';
+            document.getElementById('tierPreview').style.display = 'none';
+            document.getElementById('manualTierPreview').style.display = 'none';
+            
+            new bootstrap.Modal(document.getElementById('memberModal')).show();
+        }
+
+        function deleteMember(actNum, memberId, memberName) {
+            deleteActNum = actNum;
+            deleteMemberIdToDelete = memberId;
+            document.getElementById('deleteMemberName').textContent = memberName;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        function confirmDelete() {
+            if (deleteActNum && deleteMemberIdToDelete) {
+                const deleteBtn = document.querySelector('#deleteModal .btn-danger');
+                const originalText = deleteBtn.textContent;
+                deleteBtn.textContent = 'Deleting...';
+                deleteBtn.disabled = true;
+                
+                fetch(`/admin/delete_member/${deleteActNum}/${deleteMemberIdToDelete}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Close modal
+                        bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                        
+                        // Show success message
+                        showAlert(data.message, 'success');
+                        
+                        // Reload the page to show updated data
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        showAlert(data.error, 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('An error occurred while deleting the member.', 'danger');
+                })
+                .finally(() => {
+                    // Reset button state
+                    deleteBtn.textContent = originalText;
+                    deleteBtn.disabled = false;
+                });
+            }
+        }
+
+        function saveMember() {
+            const form = document.getElementById('memberForm');
+            const formData = new FormData(form);
+            const actionType = formData.get('action_type');
+            const makeWizard = document.getElementById('makeWizard').checked;
+            
+            let url;
+            
+            if (actionType === 'add') {
+                url = `/admin/add_member`;
+            } else {
+                const memberId = formData.get('member_id');
+                const actNum = formData.get('act');
+                url = `/admin/edit_member/${actNum}/${memberId}`;
+            }
+            
+            // Use global currentUser variable
+            const isUnknownUser = currentUser.toLowerCase() === 'unknown';
+            
+            // Prepare JSON data
+            const data = {
+                name: formData.get('name'),
+                act: formData.get('act'),
+                contributions: formData.get('contributions'),
+                makeWizard: makeWizard
+            };
+            
+            // Add category or manual rating based on user type
+            const category = document.getElementById('memberCategory').value;
+            const manualRating = document.getElementById('memberRating').value;
+            
+            if (isUnknownUser) {
+                // Unknown user can use either category or manual entry
+                if (category) {
+                    data.category = category;
+                } else if (manualRating) {
+                    data.rating = parseInt(manualRating);
+                } else {
+                    showAlert('Please select a category or enter manual points.', 'warning');
+                    return;
+                }
+            } else {
+                // Regular users must use categories
+                if (!category) {
+                    showAlert('Please select a contribution category.', 'warning');
+                    return;
+                }
+                data.category = category;
+            }
+            
+            // Show loading state
+            const saveBtn = document.querySelector('#memberModal .btn-primary');
+            const originalText = saveBtn.textContent;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            saveBtn.disabled = true;
+            
+            // Make AJAX request
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close modal
+                    bootstrap.Modal.getInstance(document.getElementById('memberModal')).hide();
+                    
+                    // Show success message
+                    showAlert(data.message, 'success');
+                    
+                    // Reload the page to show updated data
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showAlert(data.error, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred while saving the member.', 'danger');
+            })
+            .finally(() => {
+                // Reset button state
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            });
+        }
+        
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Wizard of the Fortnight Management Functions
+        function editWizard() {
+            // Get current act selection
+            const actSelect = document.getElementById('act');
+            const currentActValue = actSelect.value;
+            
+            // Only allow wizard management for the current ACT (first ACT)
+            const firstActValue = 'act{{ all_acts[0].num }}';
+            if (currentActValue !== firstActValue) {
+                showAlert('Wizard of the Fortnight is only available for the current ACT ({{ all_acts[0].name }}).', 'warning');
+                return;
+            }
+            
+            // Clear and populate wizard select
+            const wizardSelect = document.getElementById('wizardSelect');
+            wizardSelect.innerHTML = '<option value="none">None (Remove Wizard section)</option>';
+            
+            // Get current act data
+            const currentActData = allActsData[currentActValue];
+            if (currentActData) {
+                // Add cabinet members
+                currentActData.cabinet.forEach(member => {
+                    const option = document.createElement('option');
+                    option.value = member.name;
+                    option.setAttribute('data-points', member.rating);
+                    option.textContent = member.name + ' (' + member.rating + ' points) - Cabinet';
+                    wizardSelect.appendChild(option);
+                });
+                
+                // Add regular members
+                currentActData.members.forEach(member => {
+                    const option = document.createElement('option');
+                    option.value = member.name;
+                    option.setAttribute('data-points', member.rating);
+                    option.textContent = member.name + ' (' + member.rating + ' points)';
+                    wizardSelect.appendChild(option);
+                });
+            }
+            
+            // Load current wizard data if exists
+            const wizardName = '{{ fort_night.wizard_name if fort_night and fort_night.wizard_name else "" }}';
+            if (wizardName) {
+                document.getElementById('wizardSelect').value = wizardName;
+            } else {
+                document.getElementById('wizardSelect').value = 'none';
+            }
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('wizardModal'));
+            modal.show();
+        }
+
+        function saveWizard() {
+            const saveBtn = document.querySelector('#wizardModal .btn-primary');
+            const originalText = saveBtn.textContent;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            saveBtn.disabled = true;
+
+            const wizardSelection = document.getElementById('wizardSelect').value;
+
+            let formData;
+            if (wizardSelection === 'none') {
+                // Remove wizard
+                formData = {
+                    wizard_name: null,
+                    remove: true
+                };
+            } else {
+                // Set wizard
+                const selectedOption = document.getElementById('wizardSelect').selectedOptions[0];
+                const points = selectedOption.getAttribute('data-points');
+                
+                formData = {
+                    wizard_name: wizardSelection,
+                    points: points,
+                    remove: false
+                };
+            }
+
+            fetch('/api/wizard', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close modal
+                    bootstrap.Modal.getInstance(document.getElementById('wizardModal')).hide();
+                    
+                    // Show success message
+                    showAlert(data.message, 'success');
+                    
+                    // Reload the page to show updated wizard
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showAlert(data.error, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred while updating the Wizard of the Fortnight.', 'danger');
+            })
+            .finally(() => {
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            });
+        }
+
+        // Flash message handling - messages are handled server-side via Flask flash() system
+        // This section is kept for any dynamically generated messages via AJAX
+        
+    </script>
+    
+</body>
+
+</html>
