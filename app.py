@@ -1,4 +1,5 @@
 from functools import lru_cache, wraps
+import os
 from os import environ, getenv
 from os.path import dirname, join
 from datetime import datetime, timedelta
@@ -8,15 +9,18 @@ from firebase_admin import credentials, firestore, initialize_app, storage
 from flask import Flask, json, redirect, render_template, request, flash, session, jsonify, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
+# Import our Firebase configuration
+from firebase_config import initialize_firebase, check_emulator_mode
+
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = getenv("SECRET_KEY", "dev-secret-key-change-in-production")
 
 # Read environment variables set at ./.env
 if not load_dotenv(f"{dirname(__file__)}/.env"):
-    raise RuntimeError(
-        f"Could not load env file. Make sure it is located at {dirname(__file__)}/.env"
-    )
+    # In production (Vercel), .env file might not exist, which is fine
+    # Environment variables will be set through Vercel's interface
+    pass
 
 
 def check_if_required_env_variables_are_present():
@@ -28,26 +32,30 @@ def check_if_required_env_variables_are_present():
         "SECRET_KEY",
     }
 
-    if not all(env in environ for env in required_env_variables):
+    # In production, we also need Firebase service account variables
+    if not os.path.exists("firebase.json"):
+        firebase_env_vars = {
+            "FIREBASE_PROJECT_ID",
+            "FIREBASE_PRIVATE_KEY_ID", 
+            "FIREBASE_PRIVATE_KEY",
+            "FIREBASE_CLIENT_EMAIL",
+            "FIREBASE_CLIENT_ID",
+            "FIREBASE_CLIENT_X509_CERT_URL"
+        }
+        required_env_variables.update(firebase_env_vars)
+
+    missing_vars = [var for var in required_env_variables if var not in environ]
+    if missing_vars:
         raise RuntimeError(
-            f"The following required environmental variables have not been set - {(x for x in required_env_variables if x not in environ)}"
+            f"The following required environmental variables have not been set: {missing_vars}"
         )
 
 
 check_if_required_env_variables_are_present()
 
 
-# Initialize Firebase app
-creds = credentials.Certificate("firebase.json")
-initialize_app(
-    creds,
-    {
-        "storageBucket": getenv("FIREBASE_STORAGE"),
-    },
-)
-
-# Initialize Firestore
-db = firestore.client()
+# Initialize Firebase and Firestore
+db = initialize_firebase()
 
 
 # Authentication decorators
