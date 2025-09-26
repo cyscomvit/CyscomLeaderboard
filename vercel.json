@@ -1,17 +1,27 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
+    }
+  ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "api/index.py"
+      "dest": "wsgi.py"
     }
   ],
   "env": {
+    "FLASK_APP": "app.py",
     "FLASK_ENV": "production"
   },
   "functions": {
-    "api/index.py": {
-      "includeFiles": "{templates/**,static/**}"
+    "wsgi.py": {
+      "maxDuration": 60
     }
   }
 }
