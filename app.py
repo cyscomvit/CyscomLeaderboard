@@ -12,11 +12,13 @@ from werkzeug.security import check_password_hash, generate_password_hash
 app = Flask(__name__)
 app.secret_key = getenv("SECRET_KEY", "dev-secret-key-change-in-production")
 
-# Read environment variables set at ./.env
-if not load_dotenv(f"{dirname(__file__)}/.env"):
-    raise RuntimeError(
-        f"Could not load env file. Make sure it is located at {dirname(__file__)}/.env"
-    )
+# Read environment variables set at ./.env (for local development)
+# In production (Vercel), environment variables are set via dashboard
+env_loaded = load_dotenv(f"{dirname(__file__)}/.env")
+if not env_loaded:
+    # Check if we're in production (Vercel sets VERCEL environment variable)
+    if not environ.get("VERCEL"):
+        print("Warning: Could not load .env file. Assuming environment variables are set externally.")
 
 
 def check_if_required_env_variables_are_present():
@@ -55,11 +57,8 @@ private_key_raw = getenv("FIREBASE_PRIVATE_KEY")
 if private_key_raw:
     # Convert literal \n to actual newlines and remove quotes if present
     private_key_processed = private_key_raw.replace('\\n', '\n').strip('"')
-    print(f"Debug: Private key starts with: {private_key_processed[:50]}...")
-    print(f"Debug: Private key ends with: {private_key_processed[-50:]}")
 else:
-    print("Debug: No private key found in environment")
-    private_key_processed = None
+    raise RuntimeError("FIREBASE_PRIVATE_KEY environment variable is not set")
 
 firebase_config = {
     "type": getenv("FIREBASE_TYPE"),
