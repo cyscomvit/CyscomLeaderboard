@@ -4,7 +4,7 @@ from os.path import dirname, join
 from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
-from firebase_admin import credentials, firestore, initialize_app, storage
+from firebase_admin import credentials, initialize_app, db
 from flask import Flask, json, redirect, render_template, request, flash, session, jsonify, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -26,7 +26,7 @@ def check_if_required_env_variables_are_present():
         "START_ACT",
         "END_ACT",
         "CURRENT_ACT_YEAR",
-        "FIREBASE_STORAGE",
+        "FIREBASE_DB",
         "SECRET_KEY",
         "FIREBASE_TYPE",
         "FIREBASE_PROJECT_ID",
@@ -78,12 +78,12 @@ creds = credentials.Certificate(firebase_config)
 initialize_app(
     creds,
     {
-        "storageBucket": getenv("FIREBASE_STORAGE"),
+        "databaseURL": getenv("FIREBASE_DB"),
     },
 )
 
-# Initialize Firestore
-db = firestore.client()
+# Initialize Realtime Database
+database = db
 
 
 # Authentication decorators
@@ -117,10 +117,9 @@ def get_current_user():
         return None
     
     try:
-        user_doc = db.collection('users').document(session['user_id']).get()
-        if user_doc.exists:
-            return user_doc.to_dict()
-        return None
+        user_ref = database.reference(f'vitcc/owasp/users/{session["user_id"]}')
+        user_data = user_ref.get()
+        return user_data if user_data else None
     except Exception:
         return None
 
@@ -128,15 +127,16 @@ def get_current_user():
 def fetch_data(act: int | str) -> list[dict]:
     """Return a list of all members in the act. Sorted by points"""
     try:
-        # Get all members from the act collection
-        members_ref = db.collection('leaderboard').document(f'act{act}').collection('members')
-        docs = members_ref.stream()
+        # Get all members from the act in vitcc/owasp path
+        members_ref = database.reference(f'vitcc/owasp/leaderboard-act{act}')
+        members_data = members_ref.get()
         
         users_of_act = []
-        for doc in docs:
-            member_data = doc.to_dict()
-            member_data['id'] = doc.id  # Add document ID
-            users_of_act.append(member_data)
+        if members_data:
+            for member_id, member_data in members_data.items():
+                if isinstance(member_data, dict):
+                    member_data['id'] = member_id  # Add document ID
+                    users_of_act.append(member_data)
         
         # Sort by Rating (points) in descending order
         users_of_act.sort(key=lambda x: x.get("Rating", 0), reverse=True)
@@ -386,10 +386,10 @@ def leaderboard():
     # Get current Wizard of the Fortnight (only for current ACT)
     fort_night = None
     try:
-        wizard_doc = db.collection('announcements').document('current_wizard').get()
-        if wizard_doc.exists:
-            wizard_data = wizard_doc.to_dict()
-            
+        wizard_ref = database.reference('vitcc/owasp/announcements/current_wizard')
+        wizard_data = wizard_ref.get()
+        
+        if wizard_data:
             # Check if wizard is active and not expired
             if wizard_data.get("active", False):
                 # Check expiration (14 days from creation)
@@ -411,7 +411,7 @@ def leaderboard():
                             wizard_data["updated_by"] = "System (Auto-expired)"
                             
                             # Update in database
-                            db.collection('announcements').document('current_wizard').set(wizard_data)
+                            wizard_ref.set(wizard_data)
                             print(f"Wizard '{wizard_data.get('wizard_name')}' auto-expired after {days_elapsed} days")
                         else:
                             # Wizard is still active, show it
@@ -423,7 +423,7 @@ def leaderboard():
                         wizard_data["expired_at"] = datetime.now().isoformat()
                         wizard_data["updated_at"] = datetime.now().isoformat()
                         wizard_data["updated_by"] = "System (Date parsing failed)"
-                        db.collection('announcements').document('current_wizard').set(wizard_data)
+                        wizard_ref.set(wizard_data)
     except Exception as e:
         print(f"Error fetching Wizard: {e}")
     
@@ -459,29 +459,35 @@ def cyscom_login():
         
         # Check all users to find matching username
         try:
-            users_collection = db.collection('users')
-            users_query = users_collection.where('username', '==', username).limit(1)
-            users = list(users_query.stream())
+            users_ref = database.reference('vitcc/owasp/users')
+            users_data = users_ref.get()
             
-            if users:
-                user_doc = users[0]
-                user_data = user_doc.to_dict()
-                user_id = user_doc.id
-                
-                if check_password_hash(user_data.get("password_hash", ""), password):
+            user_found = None
+            user_id = None
+            
+            if users_data:
+                for uid, user_data in users_data.items():
+                    if isinstance(user_data, dict) and user_data.get('username') == username:
+                        user_found = user_data
+                        user_id = uid
+                        break
+            
+            if user_found:
+                if check_password_hash(user_found.get("password_hash", ""), password):
                     session['user_id'] = user_id
-                    session['username'] = user_data.get("username")
-                    session['role'] = user_data.get("role", "user")
+                    session['username'] = user_found.get("username")
+                    session['role'] = user_found.get("role", "user")
                     
                     # Welcome message with role context
-                    role = user_data.get("role", "user")
+                    role = user_found.get("role", "user")
                     if role in ["admin", "cabinet"]:
-                        flash(f"Welcome back, {user_data.get('name', username)}! You can now manage the leaderboard.", "success")
+                        flash(f"Welcome back, {user_found.get('name', username)}! You can now manage the leaderboard.", "success")
                     else:
-                        flash(f"Welcome back, {user_data.get('name', username)}!", "success")
+                        flash(f"Welcome back, {user_found.get('name', username)}!", "success")
                     
                     # Update last login
-                    user_doc.reference.update({'last_login': datetime.now().isoformat()})
+                    user_ref = database.reference(f'vitcc/owasp/users/{user_id}')
+                    user_ref.update({'last_login': datetime.now().isoformat()})
                     
                     # Always redirect to leaderboard (admin features are inline)
                     return redirect(url_for("leaderboard"))
@@ -563,8 +569,9 @@ def admin_add_member():
                 "AddedBy": current_user.get("username", "Unknown")
             }
             
-            # Save to Firestore
-            db.collection('leaderboard').document(f'act{act_num}').collection('members').document(member_id).set(member_data)
+            # Save to Realtime Database
+            member_ref = database.reference(f'vitcc/owasp/leaderboard-act{act_num}/{member_id}')
+            member_ref.set(member_data)
             
             flash(f"Member '{name}' added successfully to ACT {act_num}!", "success")
             return redirect(url_for("admin_members", act=act_num))
@@ -586,11 +593,11 @@ def admin_edit_member(act_num, member_id):
     
     # Get current member data
     try:
-        member_doc = db.collection('leaderboard').document(f'act{act_num}').collection('members').document(member_id).get()
-        if not member_doc.exists:
+        member_ref = database.reference(f'vitcc/owasp/leaderboard-act{act_num}/{member_id}')
+        member_data = member_ref.get()
+        if not member_data:
             flash("Member not found.", "error")
             return redirect(url_for("admin_members"))
-        member_data = member_doc.to_dict()
     except Exception as e:
         flash("Error retrieving member data.", "error")
         return redirect(url_for("admin_members"))
@@ -617,8 +624,9 @@ def admin_edit_member(act_num, member_id):
                 "LastModifiedBy": current_user.get("username", "Unknown")
             }
             
-            # Update in Firestore
-            db.collection('leaderboard').document(f'act{act_num}').collection('members').document(member_id).update(updated_data)
+            # Update in Realtime Database
+            member_ref = database.reference(f'vitcc/owasp/leaderboard-act{act_num}/{member_id}')
+            member_ref.update(updated_data)
             
             flash(f"Member '{name}' updated successfully!", "success")
             return redirect(url_for("admin_members", act=act_num))
@@ -640,14 +648,14 @@ def admin_delete_member(act_num, member_id):
     
     try:
         # Get member name for flash message
-        member_doc = db.collection('leaderboard').document(f'act{act_num}').collection('members').document(member_id).get()
+        member_ref = database.reference(f'vitcc/owasp/leaderboard-act{act_num}/{member_id}')
+        member_data = member_ref.get()
         member_name = "Unknown"
-        if member_doc.exists:
-            member_data = member_doc.to_dict()
+        if member_data:
             member_name = member_data.get("Name", "Unknown")
         
-        # Delete member from Firestore
-        db.collection('leaderboard').document(f'act{act_num}').collection('members').document(member_id).delete()
+        # Delete member from Realtime Database
+        member_ref.delete()
         
         flash(f"Member '{member_name}' deleted successfully!", "success")
         
@@ -726,8 +734,9 @@ def api_add_member():
             "UpdatedBy": current_user.get("username", "Unknown")
         }
         
-        # Save to Firestore
-        db.collection('leaderboard').document(f'act{act_num}').collection('members').document(member_id).set(member_data)
+        # Save to Realtime Database
+        member_ref = database.reference(f'vitcc/owasp/leaderboard-act{act_num}/{member_id}')
+        member_ref.set(member_data)
         
         # Handle Wizard of the Fortnight assignment
         if make_wizard:
@@ -743,8 +752,9 @@ def api_add_member():
                 "expires_at": (datetime.now() + timedelta(days=14)).isoformat()  # Auto-calculate expiration
             }
             
-            # Save to Firestore
-            db.collection('announcements').document('current_wizard').set(wizard_data)
+            # Save to Realtime Database
+            wizard_ref = database.reference('vitcc/owasp/announcements/current_wizard')
+            wizard_ref.set(wizard_data)
             
             return jsonify({"success": True, "message": f"Member '{name}' added successfully with {point_source} ({rating} points) and selected as Wizard of the Fortnight! (Expires in 14 days)"})
         else:
@@ -767,11 +777,10 @@ def api_edit_member(act_num, member_id):
             return jsonify({"success": False, "error": "No data provided"})
         
         # Get current member data
-        member_doc = db.collection('leaderboard').document(f'act{act_num}').collection('members').document(member_id).get()
-        if not member_doc.exists:
+        member_ref = database.reference(f'vitcc/owasp/leaderboard-act{act_num}/{member_id}')
+        member_data = member_ref.get()
+        if not member_data:
             return jsonify({"success": False, "error": "Member not found"})
-        
-        member_data = member_doc.to_dict()
         
         name = data.get("name", "").strip()
         contributions = data.get("contributions", "").strip()
@@ -829,8 +838,8 @@ def api_edit_member(act_num, member_id):
             "PointSource": point_source
         }
         
-        # Update in Firestore
-        db.collection('leaderboard').document(f'act{act_num}').collection('members').document(member_id).update(updated_data)
+        # Update in Realtime Database
+        member_ref.update(updated_data)
         
         # Handle Wizard of the Fortnight assignment
         if make_wizard:
@@ -846,8 +855,9 @@ def api_edit_member(act_num, member_id):
                 "expires_at": (datetime.now() + timedelta(days=14)).isoformat()
             }
             
-            # Save to Firestore
-            db.collection('announcements').document('current_wizard').set(wizard_data)
+            # Save to Realtime Database
+            wizard_ref = database.reference('vitcc/owasp/announcements/current_wizard')
+            wizard_ref.set(wizard_data)
             
             return jsonify({"success": True, "message": f"Member '{name}' updated successfully with {point_source} ({rating} points) and selected as Wizard of the Fortnight!"})
         else:
@@ -866,14 +876,14 @@ def api_delete_member(act_num, member_id):
     
     try:
         # Get member name for response message
-        member_doc = db.collection('leaderboard').document(f'act{act_num}').collection('members').document(member_id).get()
+        member_ref = database.reference(f'vitcc/owasp/leaderboard-act{act_num}/{member_id}')
+        member_data = member_ref.get()
         member_name = "Unknown"
-        if member_doc.exists:
-            member_data = member_doc.to_dict()
+        if member_data:
             member_name = member_data.get("Name", "Unknown")
         
-        # Delete member from Firestore
-        db.collection('leaderboard').document(f'act{act_num}').collection('members').document(member_id).delete()
+        # Delete member from Realtime Database
+        member_ref.delete()
         
         return jsonify({"success": True, "message": f"Member '{member_name}' deleted successfully!"})
         
@@ -900,10 +910,10 @@ def api_wizard():
     if request.method == "GET":
         # Get current Wizard of the Fortnight
         try:
-            wizard_doc = db.collection('announcements').document('current_wizard').get()
-            if wizard_doc.exists:
-                wizard_data = wizard_doc.to_dict()
-                
+            wizard_ref = database.reference('vitcc/owasp/announcements/current_wizard')
+            wizard_data = wizard_ref.get()
+            
+            if wizard_data:
                 # Check expiration before returning
                 if wizard_data.get("active", False):
                     created_at_str = wizard_data.get("created_at")
@@ -921,7 +931,7 @@ def api_wizard():
                                 wizard_data["expired_at"] = datetime.now().isoformat()
                                 wizard_data["updated_at"] = datetime.now().isoformat()
                                 wizard_data["updated_by"] = "System (Auto-expired)"
-                                db.collection('announcements').document('current_wizard').set(wizard_data)
+                                wizard_ref.set(wizard_data)
                                 return jsonify({"success": True, "wizard": None, "expired": True})
                         except Exception:
                             # If date parsing fails, consider expired
@@ -929,7 +939,7 @@ def api_wizard():
                             wizard_data["expired_at"] = datetime.now().isoformat()
                             wizard_data["updated_at"] = datetime.now().isoformat() 
                             wizard_data["updated_by"] = "System (Date parsing failed)"
-                            db.collection('announcements').document('current_wizard').set(wizard_data)
+                            wizard_ref.set(wizard_data)
                             return jsonify({"success": True, "wizard": None, "expired": True})
                 
                 return jsonify({"success": True, "wizard": wizard_data if wizard_data.get("active") else None})
@@ -950,7 +960,8 @@ def api_wizard():
             if remove_wizard:
                 # Remove the wizard section completely
                 try:
-                    db.collection('announcements').document('current_wizard').delete()
+                    wizard_ref = database.reference('vitcc/owasp/announcements/current_wizard')
+                    wizard_ref.delete()
                     return jsonify({"success": True, "message": "Wizard of the Fortnight section has been removed."})
                 except Exception as e:
                     return jsonify({"success": False, "error": f"Error removing wizard: {str(e)}"})
@@ -974,8 +985,9 @@ def api_wizard():
                     "expires_at": (datetime.now() + timedelta(days=14)).isoformat()  # Auto-calculate expiration
                 }
                 
-                # Save to Firestore
-                db.collection('announcements').document('current_wizard').set(wizard_data)
+                # Save to Realtime Database
+                wizard_ref = database.reference('vitcc/owasp/announcements/current_wizard')
+                wizard_ref.set(wizard_data)
                 
                 return jsonify({"success": True, "message": f"{wizard_name} has been selected as Wizard of the Fortnight! (Expires in 14 days)"})
             
