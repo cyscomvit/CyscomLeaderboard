@@ -318,7 +318,15 @@ POINT_CATEGORIES = {
     "ctf_attendee": {"name": "CTF Attendee", "points": 10, "category": "CTF"},
     "ctf_easy_challenge": {"name": "CTF Easy Challenge", "points": 20, "category": "CTF"},
     "ctf_medium_challenge": {"name": "CTF Medium Challenge", "points": 40, "category": "CTF"},
-    "ctf_hard_challenge": {"name": "CTF Hard Challenge", "points": 80, "category": "CTF"},
+    "ctf_hard_challenge": {"name": "CTF Hard Challenge", "points": 60, "category": "CTF"},
+    "ctf_winner": {"name": "CTF Winner", "points": 75, "category": "CTF"},
+    "ctf_second_place": {"name": "CTF Second Place", "points": 65, "category": "CTF"},
+    "ctf_third_place": {"name": "CTF Third Place", "points": 55, "category": "CTF"},
+    "ctf_top_10": {"name": "CTF Top 10", "points": 40, "category": "CTF"},
+    "ctf_winner_internal": {"name": "CTF Winner Internal", "points": 60, "category": "CTF"},
+    "ctf_second_internal": {"name": "CTF Second Internal", "points": 50, "category": "CTF"},
+    "ctf_third_internal": {"name": "CTF Third Internal", "points": 45, "category": "CTF"},
+    "ctf_internal_participated": {"name": "CTF Internal Participated", "points": 30, "category": "CTF"},
     
     # Content Creation
     "info_content": {"name": "Info Content", "points": 40, "category": "Content"},
