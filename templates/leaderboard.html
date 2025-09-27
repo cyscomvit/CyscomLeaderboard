@@ -744,6 +744,11 @@
             if (rating >= 5000) return {name: 'Radiant', color: '#ff6b6b', textColor: '#fff'};
             if (rating >= 4500) return {name: 'Immortal', color: '#a855f7', textColor: '#fff'};
             
+            // Ascendent tier (new highest competitive tier)
+            if (rating >= 640) return {name: 'Ascendent III*', color: '#ff0080', textColor: '#fff'};
+            if (rating >= 625) return {name: 'Ascendent II*', color: '#ff0080', textColor: '#fff'};
+            if (rating >= 610) return {name: 'Ascendent I*', color: '#ff0080', textColor: '#fff'};
+            
             // Base thresholds (updated to match new server-side values)
             if (rating >= 390) return {name: 'Diamond III*', color: '#c772dc', textColor: '#fff'};
             if (rating >= 375) return {name: 'Diamond II*', color: '#c772dc', textColor: '#fff'};

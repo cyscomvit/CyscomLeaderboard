@@ -177,12 +177,14 @@ class Act:
         self.data = fetch_data(self.num)
 
     def rank_members(self):
-        # Base thresholds (starting point) - Updated requirements
-        base_diamond_threshold = 360  # Updated from 400
-        base_platinum_threshold = 250  # Updated from 280  
-        base_gold_threshold = 140     # Updated from 160
+
+        base_ascendent_threshold = 610   
+        base_diamond_threshold = 360     
+        base_platinum_threshold = 250    
+        base_gold_threshold = 140       
         
         # Target population limits per tier
+        MAX_ASCENDENT_POPULATION = 3
         MAX_DIAMOND_POPULATION = 8
         MAX_PLATINUM_POPULATION = 12
         MAX_GOLD_POPULATION = 15
@@ -191,6 +193,9 @@ class Act:
         self.members.sort(key=lambda x: x.get("Rating", 0), reverse=True)
         
         # Calculate dynamic thresholds based on population density
+        ascendent_threshold = self._calculate_dynamic_threshold(
+            base_ascendent_threshold, MAX_ASCENDENT_POPULATION, "ascendent"
+        )
         diamond_threshold = self._calculate_dynamic_threshold(
             base_diamond_threshold, MAX_DIAMOND_POPULATION, "diamond"
         )
@@ -205,7 +210,17 @@ class Act:
         for member in self.members:
             rating = member.get("Rating", 0)
             
-            if rating >= diamond_threshold:
+            if rating >= ascendent_threshold:
+                # Ascendent tier - assign sub-ranks based on score within ascendent
+                ascendent_range = max(75, (max([m["Rating"] for m in self.members if m["Rating"] >= ascendent_threshold]) - ascendent_threshold) / 3)
+                if rating >= ascendent_threshold + (2 * ascendent_range):
+                    member["Image"] = "ascendent-3"  # Highest ascendent
+                elif rating >= ascendent_threshold + ascendent_range:
+                    member["Image"] = "ascendent-2"  # Mid ascendent
+                else:
+                    member["Image"] = "ascendent-1"  # Lower ascendent
+                    
+            elif rating >= diamond_threshold:
                 # Diamond tier - assign sub-ranks based on score within diamond
                 diamond_range = max(50, (max([m["Rating"] for m in self.members if m["Rating"] >= diamond_threshold]) - diamond_threshold) / 3)
                 if rating >= diamond_threshold + (2 * diamond_range):
