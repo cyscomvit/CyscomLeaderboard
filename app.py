@@ -326,7 +326,7 @@ POINT_CATEGORIES = {
     # Pull Request Contributions
     "easy_pr": {"name": "Easy PR", "points": 20, "category": "Development"},
     "medium_pr": {"name": "Medium PR", "points": 40, "category": "Development"},
-    "hard_pr": {"name": "Hard PR", "points": 80, "category": "Development"},
+    "hard_pr": {"name": "Hard PR", "points": 60, "category": "Development"},
     
     # CTF Contributions
     "ctf_host": {"name": "CTF Host", "points": 30, "category": "CTF"},
@@ -369,6 +369,8 @@ POINT_CATEGORIES = {
     
     # Social Functions
     "sf_lite": {"name": "SF Lite", "points": 30, "category": "Social"},
+    "photography": {"name": "Photography", "points": 15, "category": "Social"},
+    "sm_content": {"name": "SM content", "points": 15, "category": "Social"},
     "sf_medium": {"name": "SF Medium", "points": 60, "category": "Social"},
     "wtf": {"name": "WTF", "points": 75, "category": "Social"},
     
