@@ -1,6 +1,6 @@
 # opensrc-website
 
-CYSCOM VIT's leaderboard hosted [here](https://opensrc.cyscomvit.com)
+CYSCOM VIT's leaderboard 
 
 # Setup
 
@@ -10,28 +10,27 @@ Format of `.env` file to be placed [here](./.env)
 
 ```env
 START_ACT=3
-END_ACT=6
-CURRENT_ACT_YEAR=2024
-FIREBASE_DB=https://project-id-full-name.firebaseio.com
-FIREBASE_STORAGE=something.appspot.com
-DEBUG=FALSE
+END_ACT=8
+CURRENT_ACT_YEAR=2025
+SECRET_KEY=your-very-secure-secret-key-here
+FIREBASE_STORAGE=your-project.appspot.com
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_PRIVATE_KEY_ID=your-private-key-id
+FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nYour private key here\n-----END PRIVATE KEY-----
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project.iam.gserviceaccount.com
+FIREBASE_CLIENT_ID=your-client-id
+FIREBASE_CLIENT_X509_CERT_URL=https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-xxxxx%40your-project.iam.gserviceaccount.com
 ```
 
 1. Start act - The number of the act to start from when displaying the leaderboard.
 2. END act - current act number in the database
 3. Current act year - field just used to show the year beside the name of the acts in the dropdown
-4. Firebase DB url `str`
-5. Firebase storage url `str`
-6. DEBUG True or False `bool`. Sets the command prefix to !cyscom-dev to differentiate from production deployement and for testing.
+4. Use a service account to manage db entries
 
-### 2. Run using docker
-
-```sh
-docker build -t cyscomvit/opensrc-website:latest .
-docker run --detach --publish 5000:5000 --name opensrc-website-deploy cyscomvit/opensrc-website:latest
-```
 
 # Development
+
+## Run the project using `python app.py` after installing dependencies using `pip install -r requirements.txt`.
 
 The project uses [Poetry](https://python-poetry.org/) to manage dependencies.
 
