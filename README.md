@@ -30,7 +30,14 @@ FIREBASE_CLIENT_X509_CERT_URL=https://www.googleapis.com/robot/v1/metadata/x509/
 
 # Development
 
-## Run the project using `python app.py` after installing dependencies using `pip install -r requirements.txt`.
+## Run the project using 
+```
+python app.py
+```
+after installing dependencies using 
+```
+pip install -r requirements.txt
+```
 
 The project uses [Poetry](https://python-poetry.org/) to manage dependencies.
 
