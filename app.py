@@ -330,9 +330,8 @@ POINT_CATEGORIES = {
     
     # Content Creation
     "info_content": {"name": "Info Content", "points": 40, "category": "Content"},
-    "blog_content": {"name": "Blog Content", "points": 60, "category": "Content"},
+    "blog_content": {"name": "Blog Content", "points": 45, "category": "Content"},
     "news_content": {"name": "News Content", "points": 40, "category": "Content"},
-    "sm_posting": {"name": "Social Media Posting", "points": 15, "category": "Content"},
     "caption": {"name": "Caption", "points": 5, "category": "Content"},
     
     # Organizational
@@ -371,6 +370,9 @@ POINT_CATEGORIES = {
     "promotion_large": {"name": "Promotion Large", "points": 50, "category": "Promotion"},
     
     # Design Work
+    "sm_posting": {"name": "Social Media Posting", "points": 15, "category": "Design"},
+    "uiux": {"name": "UIUX", "points": 45, "category": "Design"},
+    "misc": {"name": "Misc", "points": 35, "category": "Design"},
     "blog_design": {"name": "Blog Design", "points": 35, "category": "Design"},
     "info_design": {"name": "Info Design", "points": 45, "category": "Design"},
     "news_design": {"name": "News Design", "points": 45, "category": "Design"},
