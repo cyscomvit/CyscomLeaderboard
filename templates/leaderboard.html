@@ -546,17 +546,24 @@
                                     <option value="info_content" data-points="40">Info Content (40 points)</option>
                                     <option value="blog_content" data-points="60">Blog Content (60 points)</option>
                                     <option value="news_content" data-points="40">News Content (40 points)</option>
-                                    <option value="sm_posting" data-points="15">Social Media Posting (15 points)</option>
                                     <option value="caption" data-points="5">Caption (5 points)</option>
+                                </optgroup>
+                                
+                                <!-- Social Media -->
+                                <optgroup label="------------Social Media------------">
+                                    <option value="sm_posting" data-points="15">Social Media Posting (15 points)</option>
+                                    <option value="brochure" data-points="10">Brochure (10 points)</option>
+                                    <option value="video_editing" data-points="20">Video Editing (20 points)</option>
                                 </optgroup>
                                 
                                 <!-- Organization -->
                                 <optgroup label="------------Organization------------">
                                     <option value="subordinate" data-points="20">Subordinate (20 points)</option>
                                     <option value="idea" data-points="3">Idea (3 points)</option>
-                                    <option value="brochure" data-points="10">Brochure (10 points)</option>
                                     <option value="demos" data-points="20">Demos (20 points)</option>
-                                    <option value="video_editing" data-points="20">Video Editing (20 points)</option>
+                                    <option value="sf_lite" data-points="30">Sponsership & Finance Lite (30 points)</option>
+                                    <option value="sf_medium" data-points="60">Sponsership & Finance Medium (60 points)</option>
+                                    <option value="wtf" data-points="75">Sponsership & Finance Heavy (75 points)</option>
                                 </optgroup>
                                 
                                 <!-- Organizational Committee -->
@@ -572,13 +579,6 @@
                                     <option value="em_lite" data-points="15">EM Lite (15 points)</option>
                                     <option value="em_medium" data-points="30">EM Medium (30 points)</option>
                                     <option value="em_heavy" data-points="60">EM Heavy (60 points)</option>
-                                </optgroup>
-                                
-                                <!-- Social Functions -->
-                                <optgroup label="------------Social------------">
-                                    <option value="sf_lite" data-points="30">SF Lite (30 points)</option>
-                                    <option value="sf_medium" data-points="60">SF Medium (60 points)</option>
-                                    <option value="wtf" data-points="75">WTF (75 points)</option>
                                 </optgroup>
                                 
                                 <!-- Community & Marketing -->
@@ -734,30 +734,32 @@
             if (rating >= 5000) return {name: 'Radiant', color: '#ff6b6b', textColor: '#fff'};
             if (rating >= 4500) return {name: 'Immortal', color: '#a855f7', textColor: '#fff'};
             
-            // Base thresholds (may be adjusted dynamically server-side)
-            if (rating >= 320) return {name: 'Diamond III*', color: '#3b82f6', textColor: '#fff'};
-            if (rating >= 280) return {name: 'Diamond II*', color: '#3b82f6', textColor: '#fff'};
-            if (rating >= 250) return {name: 'Diamond I*', color: '#3b82f6', textColor: '#fff'};
+            // Base thresholds (updated to match new server-side values)
+            if (rating >= 390) return {name: 'Diamond III*', color: '#c772dc', textColor: '#fff'};
+            if (rating >= 375) return {name: 'Diamond II*', color: '#c772dc', textColor: '#fff'};
+            if (rating >= 360) return {name: 'Diamond I*', color: '#c772dc', textColor: '#fff'};
             
-            if (rating >= 220) return {name: 'Platinum III*', color: '#06b6d4', textColor: '#fff'};
-            if (rating >= 200) return {name: 'Platinum II*', color: '#06b6d4', textColor: '#fff'};
-            if (rating >= 180) return {name: 'Platinum I*', color: '#06b6d4', textColor: '#fff'};
+            if (rating >= 275) return {name: 'Platinum III*', color: '#06b6d4', textColor: '#fff'};
+            if (rating >= 265) return {name: 'Platinum II*', color: '#06b6d4', textColor: '#fff'};
+            if (rating >= 250) return {name: 'Platinum I*', color: '#06b6d4', textColor: '#fff'};
             
-            if (rating >= 150) return {name: 'Gold III*', color: '#eab308', textColor: '#000'};
-            if (rating >= 125) return {name: 'Gold II*', color: '#eab308', textColor: '#000'};
-            if (rating >= 100) return {name: 'Gold I*', color: '#eab308', textColor: '#000'};
+            if (rating >= 160) return {name: 'Gold III*', color: '#eab308', textColor: '#000'};
+            if (rating >= 150) return {name: 'Gold II*', color: '#eab308', textColor: '#000'};
+            if (rating >= 140) return {name: 'Gold I*', color: '#eab308', textColor: '#000'};
             
-            if (rating >= 90) return {name: 'Silver III', color: '#6b7280', textColor: '#fff'};
-            if (rating >= 85) return {name: 'Silver II', color: '#6b7280', textColor: '#fff'};
-            if (rating >= 75) return {name: 'Silver I', color: '#6b7280', textColor: '#fff'};
+            if (rating >= 125) return {name: 'Silver III', color: '#6b7280', textColor: '#fff'};
+            if (rating >= 115) return {name: 'Silver II', color: '#6b7280', textColor: '#fff'};
+            if (rating >= 100) return {name: 'Silver I', color: '#6b7280', textColor: '#fff'};
             
-            if (rating >= 65) return {name: 'Bronze III', color: '#cd7c2f', textColor: '#fff'};
-            if (rating >= 60) return {name: 'Bronze II', color: '#cd7c2f', textColor: '#fff'};
-            if (rating >= 50) return {name: 'Bronze I', color: '#cd7c2f', textColor: '#fff'};
+            if (rating >= 90) return {name: 'Bronze III', color: '#cd7c2f', textColor: '#fff'};
+            if (rating >= 80) return {name: 'Bronze II', color: '#cd7c2f', textColor: '#fff'};
+            if (rating >= 70) return {name: 'Bronze I', color: '#cd7c2f', textColor: '#fff'};
             
-            if (rating >= 40) return {name: 'Iron III', color: '#4b5563', textColor: '#fff'};
-            if (rating >= 35) return {name: 'Iron II', color: '#4b5563', textColor: '#fff'};
-            if (rating >= 25) return {name: 'Iron I', color: '#4b5563', textColor: '#fff'};
+            if (rating >= 60) return {name: 'Iron III', color: '#4b5563', textColor: '#fff'};
+            if (rating >= 50) return {name: 'Iron II', color: '#4b5563', textColor: '#fff'};
+            if (rating >= 40) return {name: 'Iron I', color: '#4b5563', textColor: '#fff'};
+            
+            if (rating >= 20) return {name: 'Iron I', color: '#4b5563', textColor: '#fff'};
             
             if (rating > 0) return {name: 'Iron I', color: '#4b5563', textColor: '#fff'};
             return {name: 'Unranked', color: '#9ca3af', textColor: '#000'};

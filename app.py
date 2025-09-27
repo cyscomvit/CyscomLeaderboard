@@ -177,10 +177,10 @@ class Act:
         self.data = fetch_data(self.num)
 
     def rank_members(self):
-        # Base thresholds (starting point) - Increased for higher requirements
-        base_diamond_threshold = 400  # Increased from 270
-        base_platinum_threshold = 280  # Increased from 180  
-        base_gold_threshold = 160     # Increased from 100
+        # Base thresholds (starting point) - Updated requirements
+        base_diamond_threshold = 360  # Updated from 400
+        base_platinum_threshold = 250  # Updated from 280  
+        base_gold_threshold = 140     # Updated from 160
         
         # Target population limits per tier
         MAX_DIAMOND_POPULATION = 8
@@ -235,38 +235,38 @@ class Act:
                 else:
                     member["Image"] = "gold-1"  # Lower gold
                     
-            elif rating >= 120:
-                # Silver tier (120-159) - Increased from 75-99
-                if rating >= 145:
-                    member["Image"] = "silver-3"  # 145+
-                elif rating >= 135:
-                    member["Image"] = "silver-2"  # 135-144
+            elif rating >= 100:
+                # Silver tier (100-139) - Adjusted to align with new gold threshold
+                if rating >= 125:
+                    member["Image"] = "silver-3"  # 125-139
+                elif rating >= 115:
+                    member["Image"] = "silver-2"  # 115-124
                 else:
-                    member["Image"] = "silver-1"  # 120-134
+                    member["Image"] = "silver-1"  # 100-114
                     
-            elif rating >= 80:
-                # Bronze tier (80-119) - Increased from 50-74
-                if rating >= 105:
-                    member["Image"] = "bronze-3"  # 105-119
-                elif rating >= 95:
-                    member["Image"] = "bronze-2"   # 95-104
+            elif rating >= 70:
+                # Bronze tier (70-99) - Adjusted to align with new silver threshold
+                if rating >= 90:
+                    member["Image"] = "bronze-3"  # 90-99
+                elif rating >= 80:
+                    member["Image"] = "bronze-2"   # 80-89
                 else:
-                    member["Image"] = "bronze-1"   # 80-94
+                    member["Image"] = "bronze-1"   # 70-79
                     
-            elif rating >= 50:
-                # Iron tier (50-79) - Increased from 25-49
-                if rating >= 70:
-                    member["Image"] = "iron-3"     # 70-79
-                elif rating >= 60:
-                    member["Image"] = "iron-2"     # 60-69
+            elif rating >= 40:
+                # Iron tier (40-69) - Adjusted to align with new bronze threshold
+                if rating >= 60:
+                    member["Image"] = "iron-3"     # 60-69
+                elif rating >= 50:
+                    member["Image"] = "iron-2"     # 50-59
                 else:
-                    member["Image"] = "iron-1"     # 50-59
+                    member["Image"] = "iron-1"     # 40-49
                     
-            elif rating >= 25:
-                # Low Iron tier (25-49) - Players with some points but below Iron 1
-                member["Image"] = "iron-1"     # 25-49
+            elif rating >= 20:
+                # Low Iron tier (20-39) - Players with some points but below Iron 1
+                member["Image"] = "iron-1"     # 20-39
             elif rating > 0:
-                # Minimal points (1-24)
+                # Minimal points (1-19)
                 member["Image"] = "iron-1"
             else:
                 # No points
