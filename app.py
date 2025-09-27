@@ -350,6 +350,7 @@ POINT_CATEGORIES = {
     "caption": {"name": "Caption", "points": 5, "category": "Content"},
     
     # Organizational
+    "attendance": {"name": "Attendance", "points": 5, "category": "Organization"},
     "subordinate": {"name": "Subordinate", "points": 20, "category": "Organization"},
     "idea": {"name": "Idea", "points": 3, "category": "Organization"},
     "brochure": {"name": "Brochure", "points": 10, "category": "Organization"},
@@ -365,7 +366,7 @@ POINT_CATEGORIES = {
     # Event Management
     "em_lite": {"name": "EM Lite", "points": 15, "category": "Events"},
     "em_medium": {"name": "EM Medium", "points": 30, "category": "Events"},
-    "em_heavy": {"name": "EM Heavy", "points": 60, "category": "Events"},
+    "em_heavy": {"name": "EM Heavy", "points": 50, "category": "Events"},
     
     # Social Functions
     "sf_lite": {"name": "SF Lite", "points": 30, "category": "Social"},
