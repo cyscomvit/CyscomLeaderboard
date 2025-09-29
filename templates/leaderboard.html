@@ -487,6 +487,9 @@
         <button class="floating-btn" onclick="showAddMember()" title="Add Member">
             <i class="fas fa-plus"></i> Add Member
         </button>
+        <button class="floating-btn" style="right: 200px; background:#2563eb" onclick="openBulkAttendance()" title="Bulk Attendance">
+            <i class="fas fa-user-check"></i> Bulk Attendance
+        </button>
     </div>
     {% endif %}
 
@@ -724,6 +727,51 @@
                     <button type="button" class="btn btn-primary" onclick="saveWizard()">
                         <i class="fas fa-save"></i> Save Changes
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Attendance Modal -->
+    <div class="modal fade" id="bulkAttendanceModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-check me-2"></i>Bulk Attendance (Current ACT)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Paste names (one per line, IDs optional)</label>
+                        <textarea id="attendanceInput" class="form-control" rows="8" placeholder="Akshaya H 24BYB1124\nAmarnath P 24BCE1211\nAnirudh Santhanam\n..."></textarea>
+                        <div class="form-text"><i class="fas fa-info-circle"></i> We ignore trailing IDs automatically. Fuzzy matching is applied.</div>
+                    </div>
+                    <div class="d-flex gap-2 mb-3">
+                        <button id="attendancePreviewBtn" class="btn btn-outline-primary" onclick="previewBulkAttendance()"><i class="fas fa-eye"></i> Preview</button>
+                        <button id="attendanceApplyBtn" class="btn btn-success" onclick="applyBulkAttendance()" disabled><i class="fas fa-check"></i> Apply (+5 pts)</button>
+                        <button class="btn btn-secondary" onclick="clearBulkAttendance()"><i class="fas fa-undo"></i> Clear</button>
+                    </div>
+                    <div id="attendanceResults" style="display:none;">
+                        <h6 class="mt-3">Summary</h6>
+                        <div id="attendanceSummary" class="small mb-2"></div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <h6 class="text-success">Matched</h6>
+                                <ul id="attendanceMatched" class="list-group small"></ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-warning">Ambiguous</h6>
+                                <ul id="attendanceAmbiguous" class="list-group small"></ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-danger">Unmatched</h6>
+                                <ul id="attendanceUnmatched" class="list-group small"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -1389,6 +1437,64 @@
 
         // Flash message handling - messages are handled server-side via Flask flash() system
         // This section is kept for any dynamically generated messages via AJAX
+
+        /* ---------------- Bulk Attendance Logic ---------------- */
+        function openBulkAttendance(){
+            document.getElementById('attendanceInput').value='';
+            clearBulkAttendance();
+            new bootstrap.Modal(document.getElementById('bulkAttendanceModal')).show();
+        }
+        function clearBulkAttendance(){
+            document.getElementById('attendanceResults').style.display='none';
+            document.getElementById('attendanceApplyBtn').disabled=true;
+            document.getElementById('attendanceMatched').innerHTML='';
+            document.getElementById('attendanceUnmatched').innerHTML='';
+            document.getElementById('attendanceAmbiguous').innerHTML='';
+            document.getElementById('attendanceSummary').innerHTML='';
+        }
+        function previewBulkAttendance(){
+            const input = document.getElementById('attendanceInput').value.trim();
+            if(!input){showAlert('Paste some names first.','warning');return;}
+            bulkAttendanceRequest('preview', input);
+        }
+        function applyBulkAttendance(){
+            const input = document.getElementById('attendanceInput').value.trim();
+            if(!input){showAlert('Paste some names first.','warning');return;}
+            bulkAttendanceRequest('apply', input);
+        }
+        function bulkAttendanceRequest(mode, lines){
+            const previewBtn = document.getElementById('attendancePreviewBtn');
+            const applyBtn = document.getElementById('attendanceApplyBtn');
+            const btn = mode==='preview'?previewBtn:applyBtn;
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled=true; applyBtn.disabled=true;
+            fetch('/admin/attendance_bulk',{
+                method:'POST',
+                headers:{'Content-Type':'application/json','Accept':'application/json'},
+                body: JSON.stringify({mode:mode, lines:lines})
+            }).then(r=>r.json()).then(data=>{
+                if(!data.success){showAlert(data.error||'Failed','danger');return;}
+                renderBulkAttendance(data, mode);
+                if(mode==='apply'){
+                    showAlert(`Applied attendance to ${data.summary.updated} members`,'success');
+                    setTimeout(()=>window.location.reload(),1200);
+                }
+            }).catch(e=>{showAlert('Error processing request','danger');}).finally(()=>{
+                btn.innerHTML=original; previewBtn.disabled=false; if(mode==='preview') applyBtn.disabled=false;});
+        }
+        function escHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));}
+        function renderBulkAttendance(data, mode){
+            document.getElementById('attendanceResults').style.display='block';
+            const matchedUl = document.getElementById('attendanceMatched');
+            const ambUl = document.getElementById('attendanceAmbiguous');
+            const unUl = document.getElementById('attendanceUnmatched');
+            matchedUl.innerHTML = data.matched.map(m=>`<li class='list-group-item d-flex justify-content-between align-items-center'>${escHtml(m.member_name)}<span class='badge bg-primary'>${m.confidence}</span></li>`).join('')||'<li class="list-group-item small text-muted">None</li>';
+            ambUl.innerHTML = data.ambiguous.map(a=>`<li class='list-group-item'><strong>${escHtml(a.input)}</strong><br><span class='text-muted'>${a.reason}</span><br>Options: ${a.candidates.map(c=>escHtml(c)).join(', ')}</li>`).join('')||'<li class="list-group-item small text-muted">None</li>';
+            unUl.innerHTML = data.unmatched.map(u=>`<li class='list-group-item'><strong>${escHtml(u.input||'')}</strong><br><span class='text-muted'>${escHtml(u.reason||'Unmatched')}</span>${u.suggestions?'<br>Suggestions: '+u.suggestions.map(s=>escHtml(s)).join(', '):''}</li>`).join('')||'<li class="list-group-item small text-muted">None</li>';
+            const sum = data.summary;
+            document.getElementById('attendanceSummary').innerHTML = `Inputs: ${sum.total_inputs} | Matched: <span class='text-success'>${sum.matched}</span> | Ambiguous: <span class='text-warning'>${sum.ambiguous}</span> | Unmatched: <span class='text-danger'>${sum.unmatched}</span>${mode==='preview'?` | Would Award: ${sum.would_award_points} x ${sum.points_each}`:''}`;
+            document.getElementById('attendanceApplyBtn').disabled = (mode==='preview' && (data.ambiguous.length>0 || data.matched.length===0));
+        }
         
     </script>
     

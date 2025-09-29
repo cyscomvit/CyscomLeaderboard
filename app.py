@@ -1023,5 +1023,194 @@ def api_wizard():
             return jsonify({"success": False, "error": f"Error saving Wizard: {str(e)}"})
 
 
+# ---------------- Bulk Attendance (Current ACT only) ----------------
+@app.route("/admin/attendance_bulk", methods=["POST"])
+@admin_required
+def attendance_bulk():
+    """Bulk attendance awarding via pasted names (current ACT only).
+    Request JSON: { lines: "raw text", mode: "preview"|"apply" }
+    """
+    try:
+        payload = request.get_json(silent=True) or {}
+        raw_lines = payload.get("lines", "")
+        mode = payload.get("mode", "preview").lower()
+        if not raw_lines.strip():
+            return jsonify({"success": False, "error": "No input provided"}), 400
+        if mode not in ("preview", "apply"):
+            return jsonify({"success": False, "error": "Invalid mode"}), 400
+
+        # Current ACT is the first (latest) ACT => END_ACT
+        act_num = END_ACT
+        members = fetch_data(act_num)
+
+        # Build normalized index
+        def norm(s: str) -> str:
+            return " ".join(
+                "".join(ch for ch in s.lower().strip() if ch.isalnum() or ch.isspace()).split()
+            )
+
+        indexed = []  # list of dicts {id,name,name_norm,Rating,Contributions}
+        for m in members:
+            nm = m.get("Name", "")
+            indexed.append({
+                "id": m.get("id"),
+                "act": act_num,
+                "name": nm,
+                "name_norm": norm(nm),
+                "rating": m.get("Rating", 0),
+                "contributions": m.get("Contributions", 0)
+            })
+
+        # Quick lookup by exact normalized name
+        by_name = {}
+        for item in indexed:
+            by_name.setdefault(item["name_norm"], []).append(item)
+
+        def simple_similarity(a: str, b: str) -> float:
+            # token + prefix + length proximity heuristic (0..1)
+            at = set(a.split())
+            bt = set(b.split())
+            if not at or not bt:
+                return 0.0
+            jaccard = len(at & bt) / len(at | bt)
+            prefix = 1.0 if a.split()[0][:3] == b.split()[0][:3] else 0.0
+            length_factor = 1 - abs(len(a) - len(b)) / max(len(a), len(b), 1)
+            return 0.5 * jaccard + 0.3 * prefix + 0.2 * length_factor
+
+        results_matched = []
+        results_unmatched = []
+        results_ambiguous = []
+        seen_member_ids = set()
+
+        attendance_points = POINT_CATEGORIES.get("attendance", {"points": 5})["points"]
+
+        raw_list = [l.strip() for l in raw_lines.splitlines() if l.strip()]
+        processed_inputs = []
+        for original in raw_list:
+            # Remove trailing ID token heuristically (last token containing digits & letters >= 6)
+            parts = original.split()
+            if parts:
+                last = parts[-1]
+                if any(c.isdigit() for c in last) and any(c.isalpha() for c in last) and len(last) >= 6:
+                    parts = parts[:-1]
+            name_only = " ".join(parts)
+            name_norm = norm(name_only)
+            processed_inputs.append((original, name_only, name_norm))
+
+        for original, cleaned, cleaned_norm in processed_inputs:
+            if not cleaned_norm:
+                continue
+            # Exact normalized match
+            exact_candidates = by_name.get(cleaned_norm, [])
+            if len(exact_candidates) == 1:
+                cand = exact_candidates[0]
+                # Ensure not already matched same member
+                if cand["id"] in seen_member_ids:
+                    results_unmatched.append({"input": original, "reason": "Duplicate in batch"})
+                else:
+                    results_matched.append({
+                        "input": original,
+                        "member_name": cand["name"],
+                        "member_id": cand["id"],
+                        "act": cand["act"],
+                        "confidence": 1.0
+                    })
+                    seen_member_ids.add(cand["id"])
+                continue
+            elif len(exact_candidates) > 1:
+                # same normalized name multiple members (very rare)
+                results_ambiguous.append({
+                    "input": original,
+                    "candidates": [c["name"] for c in exact_candidates],
+                    "reason": "Multiple members share name"
+                })
+                continue
+
+            # Fuzzy search across indexed (small set, linear acceptable)
+            scored = []
+            for item in indexed:
+                sim = simple_similarity(cleaned_norm, item["name_norm"])
+                if sim >= 0.75:  # threshold
+                    scored.append((sim, item))
+            scored.sort(reverse=True, key=lambda x: x[0])
+            if not scored:
+                # Provide up to 3 suggestions (best partial token overlap)
+                token = cleaned_norm.split()[0]
+                suggestions = [it["name"] for it in indexed if token and token in it["name_norm"]][:3]
+                results_unmatched.append({
+                    "input": original,
+                    "reason": "No sufficiently close match",
+                    "suggestions": suggestions
+                })
+                continue
+            # If multiple with similar high score (within 0.05 of top) -> ambiguous
+            top_score = scored[0][0]
+            top_group = [it for s,it in scored if top_score - s <= 0.05]
+            if len(top_group) > 1:
+                results_ambiguous.append({
+                    "input": original,
+                    "candidates": [c["name"] for c in top_group],
+                    "reason": "Ambiguous fuzzy match"
+                })
+                continue
+            # Single high-confidence
+            chosen = scored[0][1]
+            if chosen["id"] in seen_member_ids:
+                results_unmatched.append({"input": original, "reason": "Duplicate in batch"})
+            else:
+                results_matched.append({
+                    "input": original,
+                    "member_name": chosen["name"],
+                    "member_id": chosen["id"],
+                    "act": chosen["act"],
+                    "confidence": round(top_score, 3)
+                })
+                seen_member_ids.add(chosen["id"])
+
+        summary = {
+            "total_inputs": len(processed_inputs),
+            "matched": len(results_matched),
+            "unmatched": len(results_unmatched),
+            "ambiguous": len(results_ambiguous),
+            "points_each": attendance_points,
+            "would_award_points": len(results_matched) if mode == "preview" else 0
+        }
+
+        updates = []
+        if mode == "apply":
+            updated_count = 0
+            for m in results_matched:
+                member_id = m["member_id"]
+                member_ref = database.reference(f'vitcc/owasp/leaderboard-act{act_num}/{member_id}')
+                current_data = member_ref.get() or {}
+                new_rating = int(current_data.get("Rating", 0)) + attendance_points
+                new_contrib = int(current_data.get("Contributions", 0)) + 1
+                try:
+                    member_ref.update({
+                        "Rating": new_rating,
+                        "Contributions": new_contrib,
+                        "UpdatedAt": datetime.now().isoformat(),
+                        "UpdatedBy": get_current_user().get("username", "Unknown"),
+                        "PointSource": f"Added {attendance_points} pts - Attendance"
+                    })
+                    updates.append({"member_id": member_id, "status": "updated"})
+                    updated_count += 1
+                except Exception as e:  # continue others
+                    updates.append({"member_id": member_id, "status": "error", "error": str(e)})
+            summary["updated"] = updated_count
+
+        return jsonify({
+            "success": True,
+            "mode": mode,
+            "matched": results_matched,
+            "unmatched": results_unmatched,
+            "ambiguous": results_ambiguous,
+            "summary": summary,
+            "updates": updates if mode == "apply" else []
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Internal error: {str(e)}"}), 500
+
+
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
