@@ -1126,6 +1126,53 @@ def attendance_bulk():
                 })
                 continue
 
+            # Unique partial / first-name token match pass
+            tokens = cleaned_norm.split()
+            first_token = tokens[0] if tokens else ""
+            partial_candidates = []
+            if first_token:
+                for item in indexed:
+                    # first token prefix match OR any token exact match
+                    item_tokens = item["name_norm"].split()
+                    if item_tokens and (item_tokens[0].startswith(first_token) or first_token in item_tokens):
+                        partial_candidates.append(item)
+                # If only one candidate & not already matched
+                if len(partial_candidates) == 1:
+                    pc = partial_candidates[0]
+                    if pc["id"] in seen_member_ids:
+                        results_unmatched.append({"input": original, "reason": "Duplicate in batch"})
+                    else:
+                        results_matched.append({
+                            "input": original,
+                            "member_name": pc["name"],
+                            "member_id": pc["id"],
+                            "act": pc["act"],
+                            "confidence": 0.88  # heuristic confidence
+                        })
+                        seen_member_ids.add(pc["id"])
+                    continue
+                elif len(partial_candidates) > 1:
+                    # Try disambiguate by adding next token if present
+                    if len(tokens) > 1:
+                        second = tokens[1]
+                        refined = [c for c in partial_candidates if any(t.startswith(second) for t in c["name_norm"].split()[1:])]
+                        if len(refined) == 1:
+                            rc = refined[0]
+                            if rc["id"] in seen_member_ids:
+                                results_unmatched.append({"input": original, "reason": "Duplicate in batch"})
+                            else:
+                                results_matched.append({
+                                    "input": original,
+                                    "member_name": rc["name"],
+                                    "member_id": rc["id"],
+                                    "act": rc["act"],
+                                    "confidence": 0.9
+                                })
+                                seen_member_ids.add(rc["id"])
+                            continue
+                    # Leave to fuzzy if still multi
+
+
             # Fuzzy search across indexed (small set, linear acceptable)
             scored = []
             for item in indexed:
