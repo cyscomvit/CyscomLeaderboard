@@ -3,16 +3,7 @@ from os import environ, getenv
 from os.path import dirname, join
 from datetime import datetime, timedelta
 
-try:
-    # python-dotenv is only needed for local development when a .env file is present.
-    # In production (Vercel) environment variables are provided by the platform and
-    # python-dotenv may not be installed. Make this import optional to avoid startup
-    # crashes when it's missing.
-    from dotenv import load_dotenv
-    _HAS_DOTENV = True
-except ModuleNotFoundError:
-    load_dotenv = lambda *_args, **_kwargs: False
-    _HAS_DOTENV = False
+from dotenv import load_dotenv
 from firebase_admin import credentials, initialize_app, db
 from flask import Flask, json, redirect, render_template, request, flash, session, jsonify, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -23,17 +14,11 @@ app.secret_key = getenv("SECRET_KEY", "dev-secret-key-change-in-production")
 
 # Read environment variables set at ./.env (for local development)
 # In production (Vercel), environment variables are set via dashboard
-if _HAS_DOTENV:
-    env_loaded = load_dotenv(f"{dirname(__file__)}/.env")
-    if not env_loaded:
-        # If .env couldn't be loaded but we're not on a platform like Vercel, warn the developer
-        if not environ.get("VERCEL"):
-            print("Warning: Could not load .env file. Assuming environment variables are set externally.")
-else:
-    # dotenv not installed - assume environment variables are provided externally (production)
+env_loaded = load_dotenv(f"{dirname(__file__)}/.env")
+if not env_loaded:
+    # Check if we're in production (Vercel sets VERCEL environment variable)
     if not environ.get("VERCEL"):
-        # For local development we recommend installing python-dotenv
-        print("Note: python-dotenv not installed; skipping .env loading. Set env vars in your environment.")
+        print("Warning: Could not load .env file. Assuming environment variables are set externally.")
 
 
 def check_if_required_env_variables_are_present():
