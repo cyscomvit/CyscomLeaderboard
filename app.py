@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from firebase_admin import credentials, initialize_app, db
 from flask import Flask, json, redirect, render_template, request, flash, session, jsonify, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
+from typing import List, Dict, Union
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -124,7 +125,7 @@ def get_current_user():
         return None
 
 
-def fetch_data(act: int | str) -> list[dict]:
+def fetch_data(act: Union[int, str]) -> List[Dict]:
     """Return a list of all members in the act. Sorted by points"""
     try:
         # Get all members from the act in vitcc/owasp path
