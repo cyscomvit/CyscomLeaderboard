@@ -294,9 +294,15 @@
             {% if current_user and current_user.role in ['admin', 'cabinet'] %}
             <div style="margin-top: 20px;">
                 <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 25px; font-weight: 600; display: inline-block; margin-right: 10px;">
-                    <i class="fas fa-user-shield"></i> {{ current_user.role.title() }} Access - Manage leaderboard below
+                    <i class="fas fa-user-shield"></i> {{ current_user.role.title() }} Access
                 </span>
-                <a href="{{ url_for('logout') }}" style="background: #6c757d; color: white; text-decoration: none; padding: 10px 20px; border-radius: 25px; font-weight: 600; display: inline-block;">
+                    <button onclick="showAddMember()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 10px 20px; border-radius: 25px; font-weight: 600; display: inline-block; margin-right: 10px; cursor: pointer;">
+                    <i class="fas fa-plus"></i> Add Member
+                </button>
+                <button onclick="openBulkAttendance()" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; padding: 10px 20px; border-radius: 25px; font-weight: 600; display: inline-block; cursor: pointer;">
+                    <i class="fas fa-user-check"></i> Bulk Attendance
+                </button>
+                <a href="{{ url_for('logout') }}" style="background: #6c757d; color: white; text-decoration: none; padding: 10px 20px; border-radius: 25px; font-weight: 600; display: inline-block; margin-right: 10px;">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
             </div>
@@ -480,18 +486,6 @@
             </table>
         </div>
     </div>
-
-    <!-- Floating Action Buttons for Cabinet Members -->
-    {% if current_user and current_user.role in ['admin', 'cabinet'] %}
-    <div class="cabinet-actions">
-        <button class="floating-btn" onclick="showAddMember()" title="Add Member">
-            <i class="fas fa-plus"></i> Add Member
-        </button>
-        <button class="floating-btn" style="right: 200px; background:#2563eb" onclick="openBulkAttendance()" title="Bulk Attendance">
-            <i class="fas fa-user-check"></i> Bulk Attendance
-        </button>
-    </div>
-    {% endif %}
 
     <!-- Add/Edit Member Modal -->
     <div class="modal fade" id="memberModal" tabindex="-1">
