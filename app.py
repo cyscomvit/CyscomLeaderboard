@@ -361,7 +361,8 @@ POINT_CATEGORIES = {
     "oc_volunteer": {"name": "OC Volunteer", "points": 30, "category": "OC"},
     "oc_assigned": {"name": "OC Assigned", "points": 20, "category": "OC"},
     "oc_no_work": {"name": "OC No Work", "points": 10, "category": "OC"},
-    "oc_manager": {"name": "OC Manager", "points": 50, "category": "OC"},
+    "oc_medium": {"name": "OC Medium", "points": 50, "category": "OC"},
+    "oc_heavy": {"name": "OC Heavy", "points": 70, "category": "OC"},
     
     # Event Management
     "em_lite": {"name": "EM Lite", "points": 15, "category": "Events"},
@@ -372,8 +373,7 @@ POINT_CATEGORIES = {
     "sf_lite": {"name": "SF Lite", "points": 30, "category": "Social"},
     "photography": {"name": "Photography", "points": 15, "category": "Social"},
     "sm_content": {"name": "SM content", "points": 15, "category": "Social"},
-    "sf_medium": {"name": "SF Medium", "points": 60, "category": "Social"},
-    "wtf": {"name": "WTF", "points": 75, "category": "Social"},
+    "sf_medium": {"name": "SF Medium", "points": 50, "category": "Social"},
     
     # Community & Marketing
     "discord": {"name": "Discord", "points": 10, "category": "Community"},
