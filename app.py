@@ -178,10 +178,10 @@ class Act:
 
     def rank_members(self):
 
-        base_ascendent_threshold = 610   
-        base_diamond_threshold = 360     
-        base_platinum_threshold = 250    
-        base_gold_threshold = 140       
+        base_ascendent_threshold = 750   
+        base_diamond_threshold = 500     
+        base_platinum_threshold = 300    
+        base_gold_threshold = 150       
         
         # Target population limits per tier
         MAX_ASCENDENT_POPULATION = 3
@@ -206,86 +206,87 @@ class Act:
             base_gold_threshold, MAX_GOLD_POPULATION, "gold"
         )
         
-        # Apply rankings with dynamic thresholds
+        # Buckets for population-based ranking
+        tier_buckets = {
+            "ascendent": [],
+            "diamond": [],
+            "platinum": [],
+            "gold": [],
+            "silver": [],
+            "bronze": [],
+            "iron": [],
+            "low_iron": [],
+            "unranked": []
+        }
+
+        # Distribute members into buckets
         for member in self.members:
             rating = member.get("Rating", 0)
             
             if rating >= ascendent_threshold:
-                # Ascendent tier - assign sub-ranks based on score within ascendent
-                ascendent_range = max(75, (max([m["Rating"] for m in self.members if m["Rating"] >= ascendent_threshold]) - ascendent_threshold) / 3)
-                if rating >= ascendent_threshold + (2 * ascendent_range):
-                    member["Image"] = "ascendent-3"  # Highest ascendent
-                elif rating >= ascendent_threshold + ascendent_range:
-                    member["Image"] = "ascendent-2"  # Mid ascendent
-                else:
-                    member["Image"] = "ascendent-1"  # Lower ascendent
-                    
+                tier_buckets["ascendent"].append(member)
             elif rating >= diamond_threshold:
-                # Diamond tier - assign sub-ranks based on score within diamond
-                diamond_range = max(50, (max([m["Rating"] for m in self.members if m["Rating"] >= diamond_threshold]) - diamond_threshold) / 3)
-                if rating >= diamond_threshold + (2 * diamond_range):
-                    member["Image"] = "diamond-3"  # Highest diamond
-                elif rating >= diamond_threshold + diamond_range:
-                    member["Image"] = "diamond-2"  # Mid diamond
-                else:
-                    member["Image"] = "diamond-1"  # Lower diamond
-                    
+                tier_buckets["diamond"].append(member)
             elif rating >= platinum_threshold:
-                # Platinum tier - assign sub-ranks based on score within platinum
-                platinum_range = max(30, (diamond_threshold - platinum_threshold) / 3)
-                if rating >= platinum_threshold + (2 * platinum_range):
-                    member["Image"] = "platinum-3"  # Highest platinum
-                elif rating >= platinum_threshold + platinum_range:
-                    member["Image"] = "platinum-2"  # Mid platinum
-                else:
-                    member["Image"] = "platinum-1"  # Lower platinum
-                    
+                tier_buckets["platinum"].append(member)
             elif rating >= gold_threshold:
-                # Gold tier - assign sub-ranks based on score within gold
-                gold_range = max(25, (platinum_threshold - gold_threshold) / 3)
-                if rating >= gold_threshold + (2 * gold_range):
-                    member["Image"] = "gold-3"  # Highest gold
-                elif rating >= gold_threshold + gold_range:
-                    member["Image"] = "gold-2"  # Mid gold
-                else:
-                    member["Image"] = "gold-1"  # Lower gold
-                    
+                tier_buckets["gold"].append(member)
             elif rating >= 100:
-                # Silver tier (100-139) - Adjusted to align with new gold threshold
-                if rating >= 125:
-                    member["Image"] = "silver-3"  # 125-139
-                elif rating >= 115:
-                    member["Image"] = "silver-2"  # 115-124
-                else:
-                    member["Image"] = "silver-1"  # 100-114
-                    
+                tier_buckets["silver"].append(member)
             elif rating >= 70:
-                # Bronze tier (70-99) - Adjusted to align with new silver threshold
-                if rating >= 90:
-                    member["Image"] = "bronze-3"  # 90-99
-                elif rating >= 80:
-                    member["Image"] = "bronze-2"   # 80-89
-                else:
-                    member["Image"] = "bronze-1"   # 70-79
-                    
+                tier_buckets["bronze"].append(member)
             elif rating >= 40:
-                # Iron tier (40-69) - Adjusted to align with new bronze threshold
-                if rating >= 60:
-                    member["Image"] = "iron-3"     # 60-69
-                elif rating >= 50:
-                    member["Image"] = "iron-2"     # 50-59
-                else:
-                    member["Image"] = "iron-1"     # 40-49
-                    
-            elif rating >= 20:
-                # Low Iron tier (20-39) - Players with some points but below Iron 1
-                member["Image"] = "iron-1"     # 20-39
+                tier_buckets["iron"].append(member)
             elif rating > 0:
-                # Minimal points (1-19)
-                member["Image"] = "iron-1"
+                tier_buckets["low_iron"].append(member)
             else:
-                # No points
-                member["Image"] = "unranked"
+                tier_buckets["unranked"].append(member)
+
+        # 1. Ascendent: Score-based sub-ranking (Keep existing logic)
+        if tier_buckets["ascendent"]:
+            max_asc_rating = tier_buckets["ascendent"][0]["Rating"]
+            ascendent_range = max(75, (max_asc_rating - ascendent_threshold) / 3)
+            
+            for member in tier_buckets["ascendent"]:
+                rating = member["Rating"]
+                if rating >= ascendent_threshold + (2 * ascendent_range):
+                    member["Image"] = "ascendent-3"
+                elif rating >= ascendent_threshold + ascendent_range:
+                    member["Image"] = "ascendent-2"
+                else:
+                    member["Image"] = "ascendent-1"
+
+        # 2. Other Tiers: Population-based sub-ranking
+        def assign_population_subranks(members, tier_name):
+            count = len(members)
+            if count == 0: return
+            
+            one_third = count / 3.0
+            two_thirds = 2 * count / 3.0
+            
+            for i, member in enumerate(members):
+                # Top 1/3 gets Rank 3
+                if i < one_third:
+                    member["Image"] = f"{tier_name}-3"
+                # Middle 1/3 gets Rank 2
+                elif i < two_thirds:
+                    member["Image"] = f"{tier_name}-2"
+                # Bottom 1/3 gets Rank 1
+                else:
+                    member["Image"] = f"{tier_name}-1"
+
+        assign_population_subranks(tier_buckets["diamond"], "diamond")
+        assign_population_subranks(tier_buckets["platinum"], "platinum")
+        assign_population_subranks(tier_buckets["gold"], "gold")
+        assign_population_subranks(tier_buckets["silver"], "silver")
+        assign_population_subranks(tier_buckets["bronze"], "bronze")
+        assign_population_subranks(tier_buckets["iron"], "iron")
+
+        # 3. Low Iron & Unranked
+        for member in tier_buckets["low_iron"]:
+            member["Image"] = "iron-1"
+        for member in tier_buckets["unranked"]:
+            member["Image"] = "unranked"
     
     def _calculate_dynamic_threshold(self, base_threshold: int, max_population: int, tier_name: str) -> int:
         """

@@ -370,7 +370,7 @@
                         <tr class="data">
                             <td class="rank">{{ '#' }}</td>
                             <td class="rating-image">
-                                <img src="/static/images/radiant.png" style="height: 2em;">
+                                <img src="/static/images/radiant.png" style="height: 2em;" title="Radiant">
                             </td>
                             <td class="rating">
                                 <span class="rating-value">&#8734;</span>
@@ -417,7 +417,7 @@
                         <tr class="data">
                             <td class="rank">&nbsp;</td>
                             <td class="rating-image">
-                                <img src="/static/images/immortal-badge.png" style="height: 2em;">
+                                <img src="/static/images/immortal-badge.png" style="height: 2em;" title="Wizard of the Fortnight">
                             </td>
                             <td class="rating">{{ fort_night.points or 'WIZARD' }}</td>
                             <td class="player">{{ fort_night.wizard_name }}</td>
@@ -449,7 +449,7 @@
                         <tr class="data">
                             <td class="rank">{{ loop.index }}</td>
                             <td class="rating-image">
-                                <img src="/static/images/{{ member['Image'] }}.png" style="height: 2em;">
+                                <img src="/static/images/{{ member['Image'] }}.png" style="height: 2em;" title="{{ member['Image']|replace('-', ' ')|title }}">
                             </td>
                             <td class="rating">
                                 <span class="rating-value">{{ member['Rating'] }}</span>
